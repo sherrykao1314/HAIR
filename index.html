@@ -40,7 +40,8 @@
         .fc-day-today { background-color: #fff9f0 !important; }
         .fc-event { border: none !important; border-radius: 6px !important; padding: 3px 6px !important; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; text-transform: capitalize !important; }
-        .fc-button-primary:hover { background-color: #b5956a !important; border-color: #b5956a !important; }
+        .history-photo { max-width: 150px; border-radius: 10px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #f4eee8; cursor: pointer; transition: transform 0.2s;}
+        .history-photo:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -52,7 +53,6 @@
     </div>
 
     <div class="row">
-        <!-- 左側主區塊 -->
         <div class="col-lg-8">
             <div class="card" style="border: 1px solid #f4eee8;">
                 <div class="card-header d-flex align-items-center gap-2">
@@ -76,7 +76,7 @@
                 <div class="card-header"><span style="font-size: 1.3rem;">📅</span> 客戶搜尋與預約總覽</div>
                 <div class="card-body">
                     <div class="input-group mb-4 shadow-sm" style="border-radius: 12px; overflow: hidden;">
-                        <input type="text" id="searchInput" class="form-control border-0 bg-light" list="customerDataList" placeholder="🔍 輸入姓名關鍵字 (例如：阿宛)">
+                        <input type="text" id="searchInput" class="form-control border-0 bg-light" list="customerDataList" placeholder="🔍 輸入姓名關鍵字 (例如：陳小姐)">
                         <datalist id="customerDataList"></datalist>
                         <button class="btn btn-light border-0 px-4" onclick="searchCustomer()">搜尋</button>
                         <button class="btn btn-custom px-4" onclick="showCalendar()">行事曆</button>
@@ -87,7 +87,6 @@
             </div>
         </div>
 
-        <!-- 右側情報區塊 -->
         <div class="col-lg-4">
             <div class="card h-100 shadow-sm" style="background: #ffffff;">
                 <div class="card-header text-dark border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
@@ -104,7 +103,6 @@
     </div>
 </div>
 
-<!-- 右下角新增按鈕 -->
 <div class="fab" data-bs-toggle="modal" data-bs-target="#addRecordModal">+</div>
 
 <div class="modal fade" id="addRecordModal" tabindex="-1">
@@ -116,8 +114,13 @@
       </div>
       <div class="modal-body p-4">
         <form id="recordForm">
+            <!-- ⭐ 新增：綁定 datalist 與 onchange 自動帶入事件 -->
             <div class="row mb-3">
-                <div class="col-md-4"><label class="form-label text-muted small">姓名 *</label><input type="text" class="form-control" id="formName" required></div>
+                <div class="col-md-4">
+                    <label class="form-label text-muted small">姓名 *</label>
+                    <input type="text" class="form-control" id="formName" list="formCustomerList" onchange="autoFillCustomer()" placeholder="輸入舊客自動帶入資料" required>
+                    <datalist id="formCustomerList"></datalist>
+                </div>
                 <div class="col-md-4"><label class="form-label text-muted small">電話</label><input type="text" class="form-control" id="formPhone"></div>
                 <div class="col-md-4"><label class="form-label text-muted small">生日 (選填)</label><input type="date" class="form-control" id="formBirthday"></div>
             </div>
@@ -126,6 +129,12 @@
                 <div class="col-md-4"><label class="form-label text-muted small">頭髮長度</label><select class="form-select" id="formHair"><option value="長髮">長髮</option><option value="短髮">短髮</option></select></div>
                 <div class="col-md-4"><label class="form-label text-muted small">消費日期</label><input type="date" class="form-control" id="formDate" required></div>
             </div>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted small">📸 上傳作品照 (選填，自動存入 Drive/fisher)</label>
+                <input class="form-control" type="file" id="formPhoto" accept="image/*">
+            </div>
+
             <div class="mb-4 bg-light p-3 rounded-3">
                 <label class="form-label text-muted small d-block mb-2">服務項目</label>
                 <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="洗剪" id="srv1"><label class="form-check-label" for="srv1">洗剪</label></div>
@@ -139,6 +148,7 @@
                 <div class="col-md-6"><label class="form-label text-muted small">購買產品 (填寫後60天會提醒回購)</label><input type="text" class="form-control" id="formProducts"></div>
             </div>
             <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="紀錄客人的喜好... (包含 想/要/考慮 染/燙 等字眼，AI會自動捕捉商機)"></textarea></div>
+            
             <button type="submit" class="btn btn-custom w-100 py-3 mt-2" id="submitBtn">儲存紀錄</button>
         </form>
       </div>
@@ -153,6 +163,8 @@
     // =====================================
     
     let calendar;
+    let globalCustomers = []; // 用來存取客戶資料以便自動帶入
+
     document.getElementById('todayDate').innerText = new Date().toLocaleDateString('zh-TW');
     document.getElementById('formDate').valueAsDate = new Date(); 
 
@@ -169,12 +181,29 @@
     }
 
     function renderDataList(customers) {
+        globalCustomers = customers; // 儲存至全域變數
         const dl = document.getElementById('customerDataList');
+        const formDl = document.getElementById('formCustomerList');
         dl.innerHTML = '';
+        if(formDl) formDl.innerHTML = '';
+        
         customers.forEach(c => { 
             let vipMark = c.vip ? ` [${c.vip}]` : '';
             dl.innerHTML += `<option value="${c.name}">${c.phone || ''}${vipMark}</option>`; 
+            if(formDl) formDl.innerHTML += `<option value="${c.name}">${c.phone || ''}</option>`;
         });
+    }
+
+    // ⭐ 自動帶入舊客資料功能
+    function autoFillCustomer() {
+        const nameInput = document.getElementById('formName').value;
+        const cust = globalCustomers.find(c => c.name === nameInput);
+        if (cust) {
+            if (cust.phone) document.getElementById('formPhone').value = cust.phone;
+            if (cust.birthday) document.getElementById('formBirthday').value = cust.birthday;
+            if (cust.gender) document.getElementById('formGender').value = cust.gender;
+            if (cust.hair) document.getElementById('formHair').value = cust.hair;
+        }
     }
 
     function initCalendar(eventsData) {
@@ -186,30 +215,21 @@
         calendar.render();
     }
 
-    // ⭐ 一鍵生成話術邏輯
+    // ⭐ LINE 專屬話術 (名字全面替換為 Fisher)
     function copyMsg(btn) {
-        const type = btn.getAttribute('data-type');
-        const name = btn.getAttribute('data-name');
-        const srv = btn.getAttribute('data-services');
-        const prod = btn.getAttribute('data-products');
-        
+        const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name'), prod = btn.getAttribute('data-products');
         let msg = '';
-        if (type === 'birthday') msg = `${name} 生日快樂！🎂 這個月是你的生日月，阿宛有幫你準備專屬的生日優惠，最近想不想換個新造型犒賞自己呀？`;
-        else if (type === 'day2') msg = `嗨 ${name}，我是阿宛！前兩天幫你弄完頭髮，自己洗頭後整理還順利嗎？有遇到問題隨時跟我說喔！😉`;
-        else if (type === 'day7') msg = `嗨 ${name}，我是阿宛！距離上次染髮過了一個禮拜，髮色還喜歡嗎？記得洗頭水溫不要太高，顏色會維持得更好喔！✨`;
-        else if (type === 'product') msg = `嗨 ${name}，我是阿宛！上次帶回去的「${prod}」是不是差不多快用完了呢？需要幫你先預留一罐嗎？🧴`;
-        else if (type === 'churn') msg = `嗨 ${name} 好久不見！最近過得好嗎？阿宛這邊最近有進新的護髮與染膏，突然想到你，有空再來找我弄頭髮聊聊天喔！☕`;
-        else msg = `嗨 ${name}，我是阿宛！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要幫你安排時間回來整理一下嗎？💇‍♀️`;
-        
-        navigator.clipboard.writeText(msg).then(() => {
-            alert('✅ 專屬話術已複製！請直接去 LINE 貼上傳送。');
-        });
+        if (type === 'birthday') msg = `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
+        else if (type === 'day2') msg = `嗨 ${name}，我是Fisher！前兩天幫你弄完頭髮，自己整理還順利嗎？有問題隨時跟我說喔！😉`;
+        else if (type === 'day7') msg = `嗨 ${name}，我是Fisher！染髮過了一個禮拜，髮色還喜歡嗎？記得水溫不要太高喔！✨`;
+        else if (type === 'product') msg = `嗨 ${name}，我是Fisher！上次帶的「${prod}」是不是快用完了呢？需要幫你預留一罐嗎？🧴`;
+        else if (type === 'churn') msg = `嗨 ${name} 好久不見！最近過得好嗎？Fisher這邊進了新的護髮，突然想到你，有空再來找我弄頭髮喔！☕`;
+        else msg = `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
+        navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！'));
     }
 
     function renderReminders(r) {
-        const container = document.getElementById('reminderList');
-        container.innerHTML = '';
-        
+        const container = document.getElementById('reminderList'); container.innerHTML = '';
         const groups = [
             { title: '🎂 即將生日 (優惠邀約)', data: r.birthday, tag: '', type: 'customer', cls: 'border-bday', act: 'birthday' },
             { title: '🚨 沉睡客甦醒 (180天未回流)', data: r.churn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'churn' },
@@ -228,9 +248,7 @@
                 container.innerHTML += `<div class="fw-bold mt-4 mb-2" style="color: #8e7d71;">${g.title}</div>`;
                 g.data.forEach(item => {
                     let dateInfo = g.act === 'birthday' ? `生日: ${item.date}` : `已過 ${Math.floor((new Date() - new Date(item.date)) / 86400000)} 天`;
-                    let srvBadge = item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '';
-                    if (g.act === 'product') srvBadge = `<span class="badge bg-warning text-dark px-2 py-1 ms-1">${item.products}</span>`;
-                    
+                    let srvBadge = g.act === 'product' ? `<span class="badge bg-warning text-dark px-2 py-1 ms-1">${item.products}</span>` : (item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '');
                     let vipBadge = item.vip ? `<span class="vip-badge">${item.vip}</span>` : '';
                     let finalTag = item.tag ? item.tag : g.tag; 
                     
@@ -241,13 +259,9 @@
                             <small style="color: #a39589;">${dateInfo}</small>
                         </div>
                         <div class="d-flex flex-column align-items-end gap-2">
-                            <!-- 📋 複製話術按鈕 -->
-                            <button class="btn btn-sm px-2 py-1" style="background: #f4eee8; color: #8e7d71; font-size:0.8rem; border-radius:6px;" 
-                                data-type="${g.act}" data-name="${item.name}" data-services="${item.services || ''}" data-products="${item.products || ''}" 
-                                onclick="copyMsg(this)">📋 話術</button>
+                            <button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.8rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" onclick="copyMsg(this)">📋 話術</button>
                             <div class="form-check m-0">
                                 <input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${finalTag}', '${g.type}', this)">
-                                <label class="form-check-label small text-muted">已聯繫</label>
                             </div>
                         </div>
                     </div>`;
@@ -282,15 +296,20 @@
             resDiv.innerHTML = '';
             if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到此顧客的紀錄</p>'; return; }
             data.data.forEach(item => {
+                let photoHtml = item.photo ? `<img src="${item.photo}" class="history-photo ms-3" onclick="window.open('${item.photo}')" title="點擊查看大圖">` : '';
+                
                 resDiv.innerHTML += `
-                    <div class="card bg-light border-0 mb-3 shadow-sm p-3" style="border-left: 4px solid var(--primary-color) !important;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <strong>${item.name} <span class="text-muted fw-normal ms-2">${item.date}</span></strong>
-                            <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
+                    <div class="card bg-light border-0 mb-3 shadow-sm p-3 d-flex flex-row" style="border-left: 4px solid var(--primary-color) !important;">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>${item.name} <span class="text-muted fw-normal ms-2">${item.date}</span></strong>
+                                <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
+                            </div>
+                            <div class="mt-2" style="color: var(--primary-color); font-weight: 500;">${item.services}</div>
+                            ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
+                            ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">${item.memo}</div>` : ''}
                         </div>
-                        <div class="mt-2" style="color: var(--primary-color); font-weight: 500;">${item.services}</div>
-                        ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
-                        ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">${item.memo}</div>` : ''}
+                        ${photoHtml}
                     </div>`;
             });
         });
@@ -300,15 +319,10 @@
         const area = document.getElementById('recommendResultArea');
         const list = document.getElementById('recommendList');
         const title = document.getElementById('recommendTitle');
-        
-        area.style.display = 'block';
-        title.innerText = `🔄 正在分析【${service}】潛在客群...`;
-        list.innerHTML = '<div class="text-center my-4"><div class="spinner-border" style="color: var(--primary-color);"></div></div>';
-
+        area.style.display = 'block'; title.innerText = `🔄 正在分析【${service}】...`; list.innerHTML = '<div class="text-center my-4"><div class="spinner-border" style="color: var(--primary-color);"></div></div>';
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getRecommendations', payload: service }) })
         .then(res => res.json()).then(data => {
-            title.innerText = `🎯 【${service}】推薦名單 (${data.data.length}名)`;
-            list.innerHTML = '';
+            title.innerText = `🎯 【${service}】推薦名單 (${data.data.length}名)`; list.innerHTML = '';
             if (data.data.length === 0) { list.innerHTML = '<div class="text-muted small text-center">目前無推薦名單</div>'; return; }
             data.data.forEach(item => {
                 list.innerHTML += `
@@ -323,19 +337,36 @@
 
     document.getElementById('recordForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn'); btn.innerText = '儲存中...'; btn.disabled = true;
+        const btn = document.getElementById('submitBtn'); btn.innerText = '圖片處理中...'; btn.disabled = true;
         const services = [];
         [1,2,3,4].forEach(i => { const cb = document.getElementById('srv'+i); if(cb.checked) services.push(cb.value); });
 
         const payload = {
             name: document.getElementById('formName').value, phone: document.getElementById('formPhone').value,
-            birthday: document.getElementById('formBirthday').value,
-            gender: document.getElementById('formGender').value, hairLength: document.getElementById('formHair').value,
-            date: document.getElementById('formDate').value, services: services,
-            formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
-            products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value
+            birthday: document.getElementById('formBirthday').value, gender: document.getElementById('formGender').value, 
+            hairLength: document.getElementById('formHair').value, date: document.getElementById('formDate').value, 
+            services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
+            products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
+            photoBase64: '', photoMimeType: ''
         };
 
+        const fileInput = document.getElementById('formPhoto');
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                payload.photoBase64 = event.target.result.split(',')[1]; 
+                payload.photoMimeType = file.type;
+                sendData(payload, btn);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            sendData(payload, btn);
+        }
+    });
+
+    function sendData(payload, btn) {
+        btn.innerText = '雲端儲存中...';
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'addRecord', payload: payload }) })
         .then(res => res.json()).then(data => {
             if(data.status === 'success') {
@@ -345,7 +376,7 @@
             } else alert('錯誤: ' + data.message);
             btn.innerText = '儲存紀錄'; btn.disabled = false;
         });
-    });
+    }
 
     window.onload = loadDashboard;
 </script>
