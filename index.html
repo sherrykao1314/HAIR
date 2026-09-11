@@ -29,8 +29,19 @@
         .form-control, .form-select { border-radius: 10px; border: 1px solid #e0e0e0; padding: 10px 15px; }
         .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(200,169,126,0.25); }
         .badge-soft { background-color: #f4eee8; color: #8e7d71; font-weight: 500; }
-        .fc .fc-toolbar-title { font-family: 'Noto Serif TC', serif; font-size: 1.3rem !important; }
-        .fc-theme-standard td { border-color: #f0f0f0; }
+        
+        /* 📅 行事曆極致美化 (去除藍色超連結) */
+        .fc a, .fc a:hover { color: inherit !important; text-decoration: none !important; cursor: pointer; } /* 殺掉藍色底線與超連結 */
+        .fc .fc-toolbar-title { font-family: 'Noto Serif TC', serif; font-size: 1.3rem !important; color: var(--text-dark); }
+        .fc-theme-standard td, .fc-theme-standard th { border-color: #f0f0f0 !important; }
+        .fc-theme-standard th { background: #faf9f7; padding: 5px 0; }
+        .fc-col-header-cell-cushion { color: var(--primary-color) !important; font-weight: 700; }
+        .fc-daygrid-day-number { color: #8e7d71 !important; font-weight: 500; padding: 8px !important; }
+        .fc-day-today { background-color: #fff9f0 !important; } /* 今天的格子變成柔和奶油色 */
+        .fc-event { border: none !important; border-radius: 6px !important; padding: 3px 6px !important; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; text-transform: capitalize !important; }
+        .fc-button-primary:hover { background-color: #b5956a !important; border-color: #b5956a !important; }
+        .fc-button-primary:not(:disabled):active, .fc-button-primary:not(:disabled).fc-button-active { background-color: #a3855d !important; border-color: #a3855d !important; }
     </style>
 </head>
 <body>
@@ -130,7 +141,7 @@
                 <div class="col-md-6"><label class="form-label text-muted small">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
                 <div class="col-md-6"><label class="form-label text-muted small">購買產品</label><input type="text" class="form-control" id="formProducts"></div>
             </div>
-            <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="紀錄客人的喜好或最近發生的事..."></textarea></div>
+            <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="紀錄客人的喜好或最近發生的事... (輸入 想/要/下次 染/燙 等字眼，AI會自動加入名單)"></textarea></div>
             <button type="submit" class="btn btn-custom w-100 py-3 mt-2" id="submitBtn">儲存紀錄</button>
         </form>
       </div>
@@ -141,6 +152,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // =====================================
+    // 已綁定你專屬的 GAS_URL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKadEE9GfMYxDG6cHDz3qaUHFZx6qzG3A7Q8T2HyImWlAP5vt1K-Wn9hk51YZ369Vmug/exec';
     // =====================================
     
@@ -200,8 +212,6 @@
                 g.data.forEach(item => {
                     let dateInfo = g.type === 'birthday' ? `生日: ${item.date}` : `已過 ${Math.floor((new Date() - new Date(item.date)) / 86400000)} 天`;
                     let srvBadge = item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '';
-                    
-                    // ⭐ 這裡會抓取後端算出來的專屬年份標籤 (item.tag)，確保打勾時寫入正確的年份
                     let finalTag = item.tag ? item.tag : g.tag; 
                     
                     container.innerHTML += `
