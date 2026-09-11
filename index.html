@@ -2,6 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     <title>Fisher客戶管理系統</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -74,7 +75,7 @@
                         <button class="btn btn-outline-custom recommend-btn" onclick="getRecommend('護髮')">🌿 護髮</button>
                     </div>
                 </div>
-                <!-- ⭐ 節慶與主題行銷選單 -->
+                <!-- ⭐ 節慶與主題行銷選單 (包含母親節/父親節/七夕) -->
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-0" style="border-radius: 10px 0 0 10px;">🎯 全年節慶行銷</span>
                     <select class="form-select border-0 bg-light" id="festivalSelect" style="border-radius: 0 10px 10px 0;">
@@ -83,8 +84,11 @@
                         <option value="節慶：2月 情人節 / 招桃花">🌸 2月 情人節 / 招桃花髮色</option>
                         <option value="節慶：3月 換季頭皮舒緩">🌱 3月 換季頭皮舒緩理療</option>
                         <option value="節慶：4月 春夏輕盈大改造">☀️ 4月 春夏輕盈短髮改造</option>
+                        <option value="節慶：母親節">🌷 4-5月 母親節 (母女同行/寵愛媽咪)</option>
                         <option value="節慶：6月 畢業求職面試">🎓 6月 畢業求職必勝髮型</option>
                         <option value="節慶：7月 夏日控油防曬">🏖️ 7月 夏日控油 / 出遊亮色</option>
+                        <option value="節慶：父親節">👔 7-8月 父親節 (男士理容/送禮)</option>
+                        <option value="節慶：七夕情人節">💖 8月 七夕情人節 (約會大改造)</option>
                         <option value="節慶：9月 秋季換色潮">🍁 9月 秋季換色潮 (除布丁頭)</option>
                         <option value="節慶：10月 曬後受損急救">🍂 10月 夏日曬後深層急救</option>
                         <option value="節慶：11月 產品週年慶囤貨">🛍️ 11月 洗護產品囤貨大賞</option>
@@ -195,7 +199,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // =====================================
+    // ⚠️ 記得確保這裡是你專屬的 GAS 網址！
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKadEE9GfMYxDG6cHDz3qaUHFZx6qzG3A7Q8T2HyImWlAP5vt1K-Wn9hk51YZ369Vmug/exec';
+    // =====================================
     
     let calendar;
     let globalCustomers = [];
@@ -265,7 +272,7 @@
         else if (type === 'product') msg = `嗨 ${name}，我是Fisher！上次帶的「${prod}」是不是快用完了呢？需要幫你預留一罐嗎？🧴`;
         else if (type === 'churn') msg = `嗨 ${name} 好久不見！最近過得好嗎？Fisher這邊進了新的護髮，突然想到你，有空再來找我弄頭髮喔！☕`;
         else msg = `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
-        navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！'));
+        navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！請去 LINE 貼上傳送'));
     }
 
     function renderReminders(r) {
@@ -372,7 +379,7 @@
     }
 
     function getRecommend(service) {
-        if (!service) return; // 沒選節慶就不動作
+        if (!service) return;
         const area = document.getElementById('recommendResultArea');
         const list = document.getElementById('recommendList');
         const title = document.getElementById('recommendTitle');
