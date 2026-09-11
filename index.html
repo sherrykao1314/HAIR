@@ -27,6 +27,7 @@
         .border-d7 { border-color: #FFDDD2; }
         .border-danger-soft { border-color: #E76F51; background: #fff6f4; }
         .border-warning-soft { border-color: #E9C46A; }
+        .border-info-soft { border-color: #457B9D; background: #f0f8ff; }
         .form-control, .form-select { border-radius: 10px; border: 1px solid #e0e0e0; padding: 10px 15px; }
         .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(200,169,126,0.25); }
         .badge-soft { background-color: #f4eee8; color: #8e7d71; font-weight: 500; }
@@ -40,7 +41,7 @@
         .fc-day-today { background-color: #fff9f0 !important; }
         .fc-event { border: none !important; border-radius: 6px !important; padding: 3px 6px !important; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; text-transform: capitalize !important; }
-        .history-photo { max-width: 150px; border-radius: 10px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #f4eee8; cursor: pointer; transition: transform 0.2s;}
+        .history-photo { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border: 2px solid #f4eee8; cursor: pointer; transition: transform 0.2s;}
         .history-photo:hover { transform: scale(1.05); }
     </style>
 </head>
@@ -103,6 +104,7 @@
     </div>
 </div>
 
+<!-- 右下角新增按鈕 -->
 <div class="fab" data-bs-toggle="modal" data-bs-target="#addRecordModal">+</div>
 
 <div class="modal fade" id="addRecordModal" tabindex="-1">
@@ -114,25 +116,26 @@
       </div>
       <div class="modal-body p-4">
         <form id="recordForm">
-            <!-- ⭐ 新增：綁定 datalist 與 onchange 自動帶入事件 -->
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label class="form-label text-muted small">姓名 *</label>
-                    <input type="text" class="form-control" id="formName" list="formCustomerList" onchange="autoFillCustomer()" placeholder="輸入舊客自動帶入資料" required>
+                    <input type="text" class="form-control" id="formName" list="formCustomerList" onchange="autoFillCustomer()" placeholder="輸入舊客自動帶入" required>
                     <datalist id="formCustomerList"></datalist>
                 </div>
                 <div class="col-md-4"><label class="form-label text-muted small">電話</label><input type="text" class="form-control" id="formPhone"></div>
                 <div class="col-md-4"><label class="form-label text-muted small">生日 (選填)</label><input type="date" class="form-control" id="formBirthday"></div>
             </div>
             <div class="row mb-3">
-                <div class="col-md-4"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
-                <div class="col-md-4"><label class="form-label text-muted small">頭髮長度</label><select class="form-select" id="formHair"><option value="長髮">長髮</option><option value="短髮">短髮</option></select></div>
-                <div class="col-md-4"><label class="form-label text-muted small">消費日期</label><input type="date" class="form-control" id="formDate" required></div>
+                <div class="col-md-3"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
+                <div class="col-md-3"><label class="form-label text-muted small">頭髮長度</label><select class="form-select" id="formHair"><option value="長髮">長髮</option><option value="短髮">短髮</option></select></div>
+                <div class="col-md-3"><label class="form-label text-muted small">消費日期</label><input type="date" class="form-control" id="formDate" required></div>
+                <div class="col-md-3"><label class="form-label text-muted small">介紹人 (選填)</label><input type="text" class="form-control" id="formReferrer" placeholder="填寫推薦人姓名"></div>
             </div>
             
             <div class="mb-3">
-                <label class="form-label text-muted small">📸 上傳作品照 (選填，自動存入 Drive/fisher)</label>
-                <input class="form-control" type="file" id="formPhoto" accept="image/*">
+                <!-- ⭐ 修改為 multiple，支援一次選擇多張照片 -->
+                <label class="form-label text-muted small">📸 上傳作品照 (可多選，AI自動壓縮上傳零延遲)</label>
+                <input class="form-control" type="file" id="formPhoto" accept="image/*" multiple>
             </div>
 
             <div class="mb-4 bg-light p-3 rounded-3">
@@ -163,10 +166,16 @@
     // =====================================
     
     let calendar;
-    let globalCustomers = []; // 用來存取客戶資料以便自動帶入
+    let globalCustomers = [];
 
     document.getElementById('todayDate').innerText = new Date().toLocaleDateString('zh-TW');
     document.getElementById('formDate').valueAsDate = new Date(); 
+
+    // ⭐ 功能 3: 監聽 Modal 關閉事件，自動清空表單
+    document.getElementById('addRecordModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('recordForm').reset();
+        document.getElementById('formDate').valueAsDate = new Date(); 
+    });
 
     function loadDashboard() {
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboard' }) })
@@ -181,7 +190,7 @@
     }
 
     function renderDataList(customers) {
-        globalCustomers = customers; // 儲存至全域變數
+        globalCustomers = customers; 
         const dl = document.getElementById('customerDataList');
         const formDl = document.getElementById('formCustomerList');
         dl.innerHTML = '';
@@ -194,7 +203,6 @@
         });
     }
 
-    // ⭐ 自動帶入舊客資料功能
     function autoFillCustomer() {
         const nameInput = document.getElementById('formName').value;
         const cust = globalCustomers.find(c => c.name === nameInput);
@@ -215,22 +223,29 @@
         calendar.render();
     }
 
-    // ⭐ LINE 專屬話術 (名字全面替換為 Fisher)
+    // ⭐ 加入轉介紹與過路客的話術
     function copyMsg(btn) {
-        const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name'), prod = btn.getAttribute('data-products');
+        const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
+        const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
         let msg = '';
+        
         if (type === 'birthday') msg = `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
+        else if (type === 'referral') msg = `嗨 ${name}！你的朋友 ${ref} 前幾天來找我弄頭髮囉，超級感謝你的推薦！下次你來找我，我幫你準備專屬的感恩升級優惠喔！💕`;
+        else if (type === 'firstRescue') msg = `嗨 ${name}！距離上次幫你服務過了一陣子，最近頭髮還習慣嗎？Fisher 針對新朋友有提供專屬的回娘家優惠，最近有空想回來整理頭髮嗎？✨`;
         else if (type === 'day2') msg = `嗨 ${name}，我是Fisher！前兩天幫你弄完頭髮，自己整理還順利嗎？有問題隨時跟我說喔！😉`;
         else if (type === 'day7') msg = `嗨 ${name}，我是Fisher！染髮過了一個禮拜，髮色還喜歡嗎？記得水溫不要太高喔！✨`;
         else if (type === 'product') msg = `嗨 ${name}，我是Fisher！上次帶的「${prod}」是不是快用完了呢？需要幫你預留一罐嗎？🧴`;
         else if (type === 'churn') msg = `嗨 ${name} 好久不見！最近過得好嗎？Fisher這邊進了新的護髮，突然想到你，有空再來找我弄頭髮喔！☕`;
         else msg = `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
+        
         navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！'));
     }
 
     function renderReminders(r) {
         const container = document.getElementById('reminderList'); container.innerHTML = '';
         const groups = [
+            { title: '🤝 轉介紹感恩 (極致擴客)', data: r.referral, tag: '', type: 'customer', cls: 'border-info-soft', act: 'referral' },
+            { title: '🆘 新客挽救 (只來1次且逾75天)', data: r.firstRescue, tag: 'f75', type: 'customer', cls: 'border-danger-soft', act: 'firstRescue' },
             { title: '🎂 即將生日 (優惠邀約)', data: r.birthday, tag: '', type: 'customer', cls: 'border-bday', act: 'birthday' },
             { title: '🚨 沉睡客甦醒 (180天未回流)', data: r.churn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'churn' },
             { title: '🧴 產品回購 (60天用罄)', data: r.product, tag: 'p60', type: 'record', cls: 'border-warning-soft', act: 'product' },
@@ -248,6 +263,8 @@
                 container.innerHTML += `<div class="fw-bold mt-4 mb-2" style="color: #8e7d71;">${g.title}</div>`;
                 g.data.forEach(item => {
                     let dateInfo = g.act === 'birthday' ? `生日: ${item.date}` : `已過 ${Math.floor((new Date() - new Date(item.date)) / 86400000)} 天`;
+                    if (g.act === 'referral') dateInfo = `被介紹人: ${item.referee}`;
+                    
                     let srvBadge = g.act === 'product' ? `<span class="badge bg-warning text-dark px-2 py-1 ms-1">${item.products}</span>` : (item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '');
                     let vipBadge = item.vip ? `<span class="vip-badge">${item.vip}</span>` : '';
                     let finalTag = item.tag ? item.tag : g.tag; 
@@ -259,7 +276,8 @@
                             <small style="color: #a39589;">${dateInfo}</small>
                         </div>
                         <div class="d-flex flex-column align-items-end gap-2">
-                            <button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.8rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" onclick="copyMsg(this)">📋 話術</button>
+                            <button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.8rem; border-radius:6px;" 
+                                data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyMsg(this)">📋 話術</button>
                             <div class="form-check m-0">
                                 <input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${finalTag}', '${g.type}', this)">
                             </div>
@@ -296,19 +314,26 @@
             resDiv.innerHTML = '';
             if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到此顧客的紀錄</p>'; return; }
             data.data.forEach(item => {
-                let photoHtml = item.photo ? `<img src="${item.photo}" class="history-photo ms-3" onclick="window.open('${item.photo}')" title="點擊查看大圖">` : '';
+                // ⭐ 多圖片預覽呈現
+                let photoUrls = item.photo ? item.photo.split(',').map(u => u.trim()).filter(u => u) : [];
+                let photoHtml = '';
+                if (photoUrls.length > 0) {
+                    photoHtml = '<div class="d-flex flex-wrap gap-2 mt-3">';
+                    photoUrls.forEach(url => {
+                        photoHtml += `<img src="${url}" class="history-photo" onclick="window.open('${url}')" title="點擊查看大圖">`;
+                    });
+                    photoHtml += '</div>';
+                }
                 
                 resDiv.innerHTML += `
-                    <div class="card bg-light border-0 mb-3 shadow-sm p-3 d-flex flex-row" style="border-left: 4px solid var(--primary-color) !important;">
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <strong>${item.name} <span class="text-muted fw-normal ms-2">${item.date}</span></strong>
-                                <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
-                            </div>
-                            <div class="mt-2" style="color: var(--primary-color); font-weight: 500;">${item.services}</div>
-                            ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
-                            ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">${item.memo}</div>` : ''}
+                    <div class="card bg-light border-0 mb-3 shadow-sm p-4" style="border-left: 4px solid var(--primary-color) !important;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>${item.name} <span class="text-muted fw-normal ms-2">${item.date}</span></strong>
+                            <span class="badge bg-secondary rounded-pill fs-6">$${item.amount}</span>
                         </div>
+                        <div class="mt-2 fs-5" style="color: var(--primary-color); font-weight: 500;">${item.services}</div>
+                        ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded border border-light">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
+                        ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">💬 ${item.memo}</div>` : ''}
                         ${photoHtml}
                     </div>`;
             });
@@ -335,9 +360,36 @@
         });
     }
 
-    document.getElementById('recordForm').addEventListener('submit', function(e) {
+    // ⭐ 前端 Canvas 圖片壓縮技術 (解決上傳卡死問題)
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 1200; // 壓縮至最長邊 1200px (極致流暢)
+                    let width = img.width, height = img.height;
+                    
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // 壓縮品質 80%
+                    resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
+                };
+            };
+        });
+    }
+
+    document.getElementById('recordForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn'); btn.innerText = '圖片處理中...'; btn.disabled = true;
+        const btn = document.getElementById('submitBtn'); btn.innerText = '圖片壓縮與上傳中...'; btn.disabled = true;
         const services = [];
         [1,2,3,4].forEach(i => { const cb = document.getElementById('srv'+i); if(cb.checked) services.push(cb.value); });
 
@@ -345,28 +397,21 @@
             name: document.getElementById('formName').value, phone: document.getElementById('formPhone').value,
             birthday: document.getElementById('formBirthday').value, gender: document.getElementById('formGender').value, 
             hairLength: document.getElementById('formHair').value, date: document.getElementById('formDate').value, 
+            referrer: document.getElementById('formReferrer').value, // 轉介紹人
             services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
             products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
-            photoBase64: '', photoMimeType: ''
+            photos: []
         };
 
         const fileInput = document.getElementById('formPhoto');
         if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                payload.photoBase64 = event.target.result.split(',')[1]; 
-                payload.photoMimeType = file.type;
-                sendData(payload, btn);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            sendData(payload, btn);
+            let promises = [];
+            for(let i=0; i<fileInput.files.length; i++) {
+                promises.push(compressImage(fileInput.files[i]));
+            }
+            payload.photos = await Promise.all(promises);
         }
-    });
 
-    function sendData(payload, btn) {
-        btn.innerText = '雲端儲存中...';
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'addRecord', payload: payload }) })
         .then(res => res.json()).then(data => {
             if(data.status === 'success') {
@@ -376,7 +421,7 @@
             } else alert('錯誤: ' + data.message);
             btn.innerText = '儲存紀錄'; btn.disabled = false;
         });
-    }
+    });
 
     window.onload = loadDashboard;
 </script>
