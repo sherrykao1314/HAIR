@@ -41,7 +41,9 @@
         .fc-day-today { background-color: #fff9f0 !important; }
         .fc-event { border: none !important; border-radius: 6px !important; padding: 3px 6px !important; font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; text-transform: capitalize !important; }
-        .history-photo { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border: 2px solid #f4eee8; cursor: pointer; transition: transform 0.2s;}
+        
+        /* 照片顯示樣式 */
+        .history-photo { width: 120px; height: 120px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.1); border: 2px solid #f4eee8; cursor: pointer; transition: transform 0.2s;}
         .history-photo:hover { transform: scale(1.05); }
     </style>
 </head>
@@ -104,7 +106,6 @@
     </div>
 </div>
 
-<!-- 右下角新增按鈕 -->
 <div class="fab" data-bs-toggle="modal" data-bs-target="#addRecordModal">+</div>
 
 <div class="modal fade" id="addRecordModal" tabindex="-1">
@@ -133,8 +134,7 @@
             </div>
             
             <div class="mb-3">
-                <!-- ⭐ 修改為 multiple，支援一次選擇多張照片 -->
-                <label class="form-label text-muted small">📸 上傳作品照 (可多選，AI自動壓縮上傳零延遲)</label>
+                <label class="form-label text-muted small">📸 上傳作品照 (可多選，自動壓縮直傳 Drive)</label>
                 <input class="form-control" type="file" id="formPhoto" accept="image/*" multiple>
             </div>
 
@@ -150,7 +150,7 @@
                 <div class="col-md-6"><label class="form-label text-muted small">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
                 <div class="col-md-6"><label class="form-label text-muted small">購買產品 (填寫後60天會提醒回購)</label><input type="text" class="form-control" id="formProducts"></div>
             </div>
-            <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="紀錄客人的喜好... (包含 想/要/考慮 染/燙 等字眼，AI會自動捕捉商機)"></textarea></div>
+            <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="包含 想/要/考慮 染/燙 等字眼，AI會自動捕捉"></textarea></div>
             
             <button type="submit" class="btn btn-custom w-100 py-3 mt-2" id="submitBtn">儲存紀錄</button>
         </form>
@@ -171,7 +171,6 @@
     document.getElementById('todayDate').innerText = new Date().toLocaleDateString('zh-TW');
     document.getElementById('formDate').valueAsDate = new Date(); 
 
-    // ⭐ 功能 3: 監聽 Modal 關閉事件，自動清空表單
     document.getElementById('addRecordModal').addEventListener('hidden.bs.modal', function () {
         document.getElementById('recordForm').reset();
         document.getElementById('formDate').valueAsDate = new Date(); 
@@ -223,7 +222,6 @@
         calendar.render();
     }
 
-    // ⭐ 加入轉介紹與過路客的話術
     function copyMsg(btn) {
         const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
         const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
@@ -314,13 +312,16 @@
             resDiv.innerHTML = '';
             if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到此顧客的紀錄</p>'; return; }
             data.data.forEach(item => {
-                // ⭐ 多圖片預覽呈現
+                // ⭐ 終極圖片破解：使用 export=download 強制 Google 吐出圖檔
                 let photoUrls = item.photo ? item.photo.split(',').map(u => u.trim()).filter(u => u) : [];
                 let photoHtml = '';
                 if (photoUrls.length > 0) {
                     photoHtml = '<div class="d-flex flex-wrap gap-2 mt-3">';
                     photoUrls.forEach(url => {
-                        photoHtml += `<img src="${url}" class="history-photo" onclick="window.open('${url}')" title="點擊查看大圖">`;
+                        let fileId = url.includes('id=') ? url.split('id=')[1].split('&')[0] : '';
+                        let displayUrl = fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : url;
+                        let fullUrl = fileId ? `https://drive.google.com/uc?export=view&id=${fileId}` : url;
+                        photoHtml += `<img src="${displayUrl}" class="history-photo" onclick="window.open('${fullUrl}')" title="點擊查看大圖" loading="lazy">`;
                     });
                     photoHtml += '</div>';
                 }
@@ -360,7 +361,6 @@
         });
     }
 
-    // ⭐ 前端 Canvas 圖片壓縮技術 (解決上傳卡死問題)
     function compressImage(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -370,7 +370,7 @@
                 img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 1200; // 壓縮至最長邊 1200px (極致流暢)
+                    const MAX_SIZE = 1200; 
                     let width = img.width, height = img.height;
                     
                     if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
@@ -380,7 +380,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // 壓縮品質 80%
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8); 
                     resolve({ base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' });
                 };
             };
@@ -397,7 +397,7 @@
             name: document.getElementById('formName').value, phone: document.getElementById('formPhone').value,
             birthday: document.getElementById('formBirthday').value, gender: document.getElementById('formGender').value, 
             hairLength: document.getElementById('formHair').value, date: document.getElementById('formDate').value, 
-            referrer: document.getElementById('formReferrer').value, // 轉介紹人
+            referrer: document.getElementById('formReferrer').value,
             services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
             products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
             photos: []
