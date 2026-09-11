@@ -6,60 +6,85 @@
     <title>Fisher客戶管理系統</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f9; font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
-        .dashboard-header { background: #2c3e50; color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .card-header { background: white; border-bottom: 2px solid #f4f6f9; font-weight: bold; border-radius: 15px 15px 0 0 !important; padding: 15px 20px; }
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: #e67e22; color: white; border-radius: 50%; text-align: center; line-height: 60px; font-size: 30px; box-shadow: 0 4px 10px rgba(230,126,34,0.4); cursor: pointer; z-index: 1000; transition: transform 0.2s; }
-        .fab:hover { transform: scale(1.1); color: white; }
-        .reminder-item { padding: 10px; border-left: 4px solid #3498db; background: #f8f9fa; margin-bottom: 10px; border-radius: 4px; font-size: 0.9rem; transition: 0.3s; }
-        .history-card { border-left: 4px solid #2c3e50; padding: 15px; background: #fff; margin-bottom: 15px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
-        #calendar { max-height: 550px; }
-        .recommend-card { background-color: #fff9e6; border-left: 4px solid #f1c40f; padding: 12px; margin-bottom: 10px; border-radius: 5px; }
+        /* 韓系沙龍美學設計 */
+        :root { --primary-color: #C8A97E; --bg-color: #FDFBF7; --text-dark: #4A4A4A; --card-bg: #FFFFFF; }
+        body { background-color: var(--bg-color); font-family: 'Noto Sans TC', sans-serif; color: var(--text-dark); }
+        h1, h2, h3, h4, h5, .serif { font-family: 'Noto Serif TC', serif; }
+        
+        .dashboard-header { background: linear-gradient(135deg, #ffffff 0%, #f4eee8 100%); color: var(--text-dark); padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(200,169,126,0.1); border: 1px solid #f0e6da; }
+        .card { border: none; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); margin-bottom: 25px; background: var(--card-bg); overflow: hidden; }
+        .card-header { background: transparent; border-bottom: 1px solid #f0f0f0; font-weight: 700; font-size: 1.1rem; padding: 20px 25px; color: var(--primary-color); }
+        
+        .btn-custom { background-color: var(--primary-color); color: white; border-radius: 12px; border: none; transition: 0.3s; }
+        .btn-custom:hover { background-color: #b5956a; color: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(200,169,126,0.3); }
+        .btn-outline-custom { border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 12px; }
+        .btn-outline-custom:hover { background-color: var(--primary-color); color: white; }
+        
+        /* 懸浮按鈕 */
+        .fab { position: fixed; bottom: 40px; right: 40px; width: 65px; height: 65px; background: linear-gradient(135deg, #C8A97E, #D4B996); color: white; border-radius: 50%; text-align: center; line-height: 60px; font-size: 32px; box-shadow: 0 6px 15px rgba(200,169,126,0.4); cursor: pointer; z-index: 1000; transition: transform 0.2s; }
+        .fab:hover { transform: scale(1.08) rotate(90deg); color: white; }
+        
+        /* 提醒名單樣式 */
+        .reminder-item { padding: 15px; border-left: 5px solid #eaeaea; background: #faf9f7; margin-bottom: 12px; border-radius: 10px; transition: 0.3s; }
+        .reminder-item:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .border-bday { border-color: #E29578; background: #fff5f2; }
+        .border-d2 { border-color: #83C5BE; }
+        .border-d7 { border-color: #FFDDD2; }
+        .border-d23 { border-color: #E29578; }
+        
+        .form-control, .form-select { border-radius: 10px; border: 1px solid #e0e0e0; padding: 10px 15px; }
+        .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.25rem rgba(200,169,126,0.25); }
+        
+        .badge-soft { background-color: #f4eee8; color: #8e7d71; font-weight: 500; }
+        .fc .fc-toolbar-title { font-family: 'Noto Serif TC', serif; font-size: 1.3rem !important; }
+        .fc-theme-standard td { border-color: #f0f0f0; }
     </style>
 </head>
 <body>
 
 <div class="container py-4">
     <div class="dashboard-header d-flex justify-content-between align-items-center">
-        <h3 class="m-0">✂️ Fisher客戶管理系統</h3>
-        <span id="todayDate"></span>
+        <h2 class="m-0 serif text-dark">✨ Fisher Salon</h2>
+        <span id="todayDate" class="text-muted"></span>
     </div>
 
     <div class="row">
         <!-- 左側主區塊 (70%) -->
         <div class="col-lg-8">
             
-            <!-- ⭐ 新增：智慧推薦區塊 -->
-            <div class="card bg-white mb-4 border border-warning border-opacity-50">
-                <div class="card-header bg-warning bg-opacity-10 text-dark">✨ AI 智慧名單推薦 (潛在業績挖掘)</div>
+            <!-- AI 智慧推薦 -->
+            <div class="card" style="border: 1px solid #f4eee8;">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <span style="font-size: 1.3rem;">💡</span> 潛在業績推薦 (AI演算)
+                </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-3">點擊下方服務項目，系統將自動比對歷史消費頻率與項目，為您揪出潛在名單：</p>
                     <div class="d-flex flex-wrap gap-2 mb-3">
-                        <button class="btn btn-outline-dark" onclick="getRecommend('剪髮')">✂️ 推薦剪髮</button>
-                        <button class="btn btn-outline-danger" onclick="getRecommend('染髮')">🎨 推薦染髮</button>
-                        <button class="btn btn-outline-primary" onclick="getRecommend('燙髮')">🌊 推薦燙髮</button>
-                        <button class="btn btn-outline-success" onclick="getRecommend('護髮')">🌿 推薦護髮</button>
+                        <button class="btn btn-outline-custom px-4" onclick="getRecommend('剪髮')">✂️ 剪髮</button>
+                        <button class="btn btn-outline-custom px-4" onclick="getRecommend('染髮')">🎨 染髮</button>
+                        <button class="btn btn-outline-custom px-4" onclick="getRecommend('燙髮')">🌊 燙髮</button>
+                        <button class="btn btn-outline-custom px-4" onclick="getRecommend('護髮')">🌿 護髮</button>
                     </div>
-                    <div id="recommendResultArea" style="display: none; max-height: 300px; overflow-y: auto;">
-                        <h6 id="recommendTitle" class="fw-bold mt-2"></h6>
+                    <div id="recommendResultArea" style="display: none;">
+                        <h6 id="recommendTitle" class="fw-bold mt-3 mb-3 text-secondary"></h6>
                         <div id="recommendList"></div>
                     </div>
                 </div>
             </div>
 
+            <!-- 搜尋與行事曆 -->
             <div class="card">
-                <div class="card-header">🔍 客戶搜尋與行事曆</div>
+                <div class="card-header"><span style="font-size: 1.3rem;">📅</span> 客戶搜尋與預約總覽</div>
                 <div class="card-body">
-                    <div class="input-group mb-4">
-                        <input type="text" id="searchInput" class="form-control" list="customerDataList" placeholder="輸入姓名關鍵字 (例如：阿宛)">
+                    <div class="input-group mb-4 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                        <input type="text" id="searchInput" class="form-control border-0 bg-light" list="customerDataList" placeholder="🔍 輸入姓名關鍵字 (例如：阿宛)">
                         <datalist id="customerDataList"></datalist>
-                        <button class="btn btn-outline-secondary" onclick="searchCustomer()">搜尋履歷</button>
-                        <button class="btn btn-outline-primary" onclick="showCalendar()">顯示行事曆</button>
+                        <button class="btn btn-light border-0 px-4" onclick="searchCustomer()">搜尋</button>
+                        <button class="btn btn-custom px-4" onclick="showCalendar()">行事曆</button>
                     </div>
                     
-                    <div id="calendarArea"><div id="calendar"></div></div>
+                    <div id="calendarArea"><div id="calendar" style="max-height: 600px;"></div></div>
                     <div id="historyArea" style="display: none;"><div id="historyResult"></div></div>
                 </div>
             </div>
@@ -67,9 +92,12 @@
 
         <!-- 右側情報區塊 (30%) -->
         <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header text-danger">🎯 待聯繫名單 (未打勾將持續保留)</div>
-                <div class="card-body p-3" id="reminderList">
+            <div class="card h-100 shadow-sm" style="background: #ffffff;">
+                <div class="card-header text-dark border-0 pt-4 pb-0">
+                    <h5 class="serif m-0">🎯 待聯繫名單</h5>
+                    <small class="text-muted fw-normal">打勾確認後才會隱藏</small>
+                </div>
+                <div class="card-body p-3 mt-2" id="reminderList">
                     <div class="text-center text-muted spinner-border spinner-border-sm" role="status"></div> 讀取中...
                 </div>
             </div>
@@ -77,40 +105,44 @@
     </div>
 </div>
 
-<!-- 右下角新增按鈕 & Modal -->
+<!-- 右下角新增按鈕 -->
 <div class="fab" data-bs-toggle="modal" data-bs-target="#addRecordModal">+</div>
+
+<!-- 新增消費紀錄 Modal -->
 <div class="modal fade" id="addRecordModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title">新增消費紀錄</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 20px; border: none;">
+      <div class="modal-header" style="background: #fdfbf7; border-bottom: 1px solid #f0e6da; padding: 20px 25px;">
+        <h5 class="modal-title serif text-dark">✍️ 新增消費紀錄</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body p-4">
         <form id="recordForm">
             <div class="row mb-3">
-                <div class="col-md-6"><label class="form-label">姓名 *</label><input type="text" class="form-control" id="formName" required></div>
-                <div class="col-md-6"><label class="form-label">電話</label><input type="text" class="form-control" id="formPhone"></div>
+                <div class="col-md-4"><label class="form-label text-muted small">姓名 *</label><input type="text" class="form-control" id="formName" required></div>
+                <div class="col-md-4"><label class="form-label text-muted small">電話</label><input type="text" class="form-control" id="formPhone"></div>
+                <!-- ⭐ 新增生日欄位 -->
+                <div class="col-md-4"><label class="form-label text-muted small">生日 (選填)</label><input type="date" class="form-control" id="formBirthday"></div>
             </div>
             <div class="row mb-3">
-                <div class="col-md-4"><label class="form-label">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
-                <div class="col-md-4"><label class="form-label">頭髮長度</label><select class="form-select" id="formHair"><option value="長髮">長髮</option><option value="短髮">短髮</option></select></div>
-                <div class="col-md-4"><label class="form-label">消費日期</label><input type="date" class="form-control" id="formDate" required></div>
+                <div class="col-md-4"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
+                <div class="col-md-4"><label class="form-label text-muted small">頭髮長度</label><select class="form-select" id="formHair"><option value="長髮">長髮</option><option value="短髮">短髮</option></select></div>
+                <div class="col-md-4"><label class="form-label text-muted small">消費日期</label><input type="date" class="form-control" id="formDate" required></div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">服務項目 (可複選)</label><br>
+            <div class="mb-4 bg-light p-3 rounded-3">
+                <label class="form-label text-muted small d-block mb-2">服務項目</label>
                 <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="洗剪" id="srv1"><label class="form-check-label" for="srv1">洗剪</label></div>
                 <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="染髮" id="srv2"><label class="form-check-label" for="srv2">染髮</label></div>
                 <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="燙髮" id="srv3"><label class="form-check-label" for="srv3">燙髮</label></div>
                 <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="護髮" id="srv4"><label class="form-check-label" for="srv4">護髮</label></div>
             </div>
-            <div class="mb-3"><label class="form-label">染燙配方</label><input type="text" class="form-control" id="formFormula"></div>
+            <div class="mb-3"><label class="form-label text-muted small">染燙配方</label><input type="text" class="form-control" id="formFormula" placeholder="例如：底色 6-CB + 9% 雙氧"></div>
             <div class="row mb-3">
-                <div class="col-md-6"><label class="form-label">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
-                <div class="col-md-6"><label class="form-label">購買產品</label><input type="text" class="form-control" id="formProducts"></div>
+                <div class="col-md-6"><label class="form-label text-muted small">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
+                <div class="col-md-6"><label class="form-label text-muted small">購買產品</label><input type="text" class="form-control" id="formProducts"></div>
             </div>
-            <div class="mb-3"><label class="form-label">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2"></textarea></div>
-            <button type="submit" class="btn btn-primary w-100 mt-3" id="submitBtn">儲存紀錄</button>
+            <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="紀錄客人的喜好或最近發生的事..."></textarea></div>
+            <button type="submit" class="btn btn-custom w-100 py-3 mt-2" id="submitBtn">儲存紀錄</button>
         </form>
       </div>
     </div>
@@ -148,49 +180,58 @@
     function initCalendar(eventsData) {
         const calendarEl = document.getElementById('calendar');
         if(calendar) { calendar.destroy(); }
-        calendar = new FullCalendar.Calendar(calendarEl, { initialView: 'dayGridMonth', locale: 'zh-tw', events: eventsData, height: 550 });
+        calendar = new FullCalendar.Calendar(calendarEl, { 
+            initialView: 'dayGridMonth', 
+            locale: 'zh-tw', 
+            events: eventsData, 
+            height: 550,
+            buttonText: { today: '今天' }
+        });
         calendar.render();
     }
 
     function renderReminders(r) {
         const container = document.getElementById('reminderList');
         container.innerHTML = '';
+        
+        // ⭐ 新增生日群組，放在最前面
         const groups = [
-            { title: '2天後 (術後追蹤)', data: r.day2, tag: 'd2' },
-            { title: '1週後 (染髮回報)', data: r.day7, tag: 'd7' },
-            { title: '23天後 (男客回流)', data: r.day23, tag: 'd23' },
-            { title: '30天後 (短髮/護髮)', data: r.day30, tag: 'd30' },
-            { title: '40天後 (長髮回流)', data: r.day40, tag: 'd40' }
+            { title: '🎂 即將生日 (優惠邀約)', data: r.birthday, tag: new Date().getFullYear(), type: 'birthday', cls: 'border-bday' },
+            { title: '2天後 (術後追蹤)', data: r.day2, tag: 'd2', type: 'record', cls: 'border-d2' },
+            { title: '1週後 (染髮回報)', data: r.day7, tag: 'd7', type: 'record', cls: 'border-d7' },
+            { title: '23天後 (男客回流)', data: r.day23, tag: 'd23', type: 'record', cls: 'border-d23' },
+            { title: '30天後 (短髮/護髮)', data: r.day30, tag: 'd30', type: 'record', cls: '' },
+            { title: '40天後 (長髮回流)', data: r.day40, tag: 'd40', type: 'record', cls: '' }
         ];
 
         let hasData = false;
         groups.forEach(g => {
-            if (g.data.length > 0) {
+            if (g.data && g.data.length > 0) {
                 hasData = true;
-                container.innerHTML += `<div class="fw-bold mt-3 mb-1 text-primary">${g.title}</div>`;
+                container.innerHTML += `<div class="fw-bold mt-4 mb-2" style="color: #8e7d71;">${g.title}</div>`;
                 g.data.forEach(item => {
-                    const daysPass = Math.floor((new Date() - new Date(item.date)) / 86400000);
+                    let dateInfo = g.type === 'birthday' ? `生日: ${item.date}` : `已過 ${Math.floor((new Date() - new Date(item.date)) / 86400000)} 天`;
+                    let srvBadge = item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '';
+                    
                     container.innerHTML += `
-                    <div class="reminder-item d-flex justify-content-between align-items-center">
+                    <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${item.name}</strong> <span class="badge bg-light text-dark">${item.services}</span><br>
-                            <small class="text-danger">已過 ${daysPass} 天</small>
+                            <strong class="text-dark">${item.name}</strong> ${srvBadge}<br>
+                            <small style="color: #a39589;">${dateInfo}</small>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" onchange="markDone(${item.row}, '${g.tag}', this)">
-                            <label class="form-check-label small text-muted">已聯繫</label>
+                            <input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${g.tag}', '${g.type}', this)">
                         </div>
                     </div>`;
                 });
             }
         });
-        if (!hasData) container.innerHTML = '<div class="text-muted text-center mt-4">目前沒有積欠的待聯繫名單喔！</div>';
+        if (!hasData) container.innerHTML = '<div class="text-muted text-center py-5">目前沒有待聯繫名單，去喝杯咖啡吧 ☕</div>';
     }
 
-    function markDone(rowId, tag, checkboxElement) {
+    function markDone(rowId, tag, type, checkboxElement) {
         checkboxElement.disabled = true; 
-        checkboxElement.nextElementSibling.innerText = "儲存中...";
-        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'markContacted', payload: { row: rowId, tag: tag } }) })
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'markContacted', payload: { row: rowId, tag: tag, type: type } }) })
         .then(res => res.json()).then(data => { if(data.status === 'success') loadDashboard(); });
     }
 
@@ -206,52 +247,47 @@
         document.getElementById('calendarArea').style.display = 'none';
         const resDiv = document.getElementById('historyResult');
         document.getElementById('historyArea').style.display = 'block';
-        resDiv.innerHTML = '<div class="text-center mt-3 spinner-border"></div>';
+        resDiv.innerHTML = '<div class="text-center mt-4 spinner-border text-secondary"></div>';
         
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'searchCustomers', payload: keyword }) })
         .then(res => res.json()).then(data => {
             resDiv.innerHTML = '';
-            if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3">無結果</p>'; return; }
+            if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到此顧客的紀錄</p>'; return; }
             data.data.forEach(item => {
                 resDiv.innerHTML += `
-                    <div class="history-card">
-                        <div class="d-flex justify-content-between"><strong>${item.name} - ${item.date}</strong><span class="badge bg-secondary">$${item.amount}</span></div>
-                        <div class="mt-2 text-primary fw-bold">${item.services}</div>
-                        ${item.formula ? `<div class="text-muted small mt-1">🧪 配方: ${item.formula}</div>` : ''}
-                        ${item.memo ? `<div class="mt-2 small px-2 py-1 bg-light border-start border-warning border-3">${item.memo}</div>` : ''}
+                    <div class="card bg-light border-0 mb-3 shadow-sm p-3" style="border-left: 4px solid var(--primary-color) !important;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>${item.name} <span class="text-muted fw-normal ms-2">${item.date}</span></strong>
+                            <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
+                        </div>
+                        <div class="mt-2" style="color: var(--primary-color); font-weight: 500;">${item.services}</div>
+                        ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
+                        ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">${item.memo}</div>` : ''}
                     </div>`;
             });
         });
     }
 
-    // ⭐ 新增：呼叫智慧推薦 API
     function getRecommend(service) {
         const area = document.getElementById('recommendResultArea');
         const list = document.getElementById('recommendList');
         const title = document.getElementById('recommendTitle');
         
         area.style.display = 'block';
-        title.innerText = `🔄 正在為您計算【${service}】潛在名單...`;
-        list.innerHTML = '<div class="text-center my-3"><div class="spinner-border text-warning"></div></div>';
+        title.innerText = `🔄 正在分析【${service}】淺在客群...`;
+        list.innerHTML = '<div class="text-center my-4"><div class="spinner-border" style="color: var(--primary-color);"></div></div>';
 
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'getRecommendations', payload: service })
-        })
-        .then(res => res.json())
-        .then(data => {
-            title.innerText = `💡 【${service}】潛在客戶清單 (${data.data.length}名)`;
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getRecommendations', payload: service }) })
+        .then(res => res.json()).then(data => {
+            title.innerText = `🎯 【${service}】推薦名單 (${data.data.length}名)`;
             list.innerHTML = '';
-            if (data.data.length === 0) {
-                list.innerHTML = '<div class="text-muted small">目前沒有符合推薦條件的客戶。</div>';
-                return;
-            }
+            if (data.data.length === 0) { list.innerHTML = '<div class="text-muted small text-center">目前無推薦名單</div>'; return; }
             data.data.forEach(item => {
                 list.innerHTML += `
-                    <div class="recommend-card">
-                        <div class="fw-bold">${item.name} <span class="text-muted small fw-normal">${item.phone || '無電話'}</span></div>
-                        <div class="small text-danger mt-1">🎯 推薦原因：${item.reason}</div>
-                        <div class="small text-muted mt-1">最後來店日：${item.lastVisit}</div>
+                    <div class="p-3 mb-2 rounded-3" style="background: #faf9f7; border-left: 4px solid var(--primary-color);">
+                        <div class="fw-bold">${item.name} <span class="text-muted small fw-normal ms-2">${item.phone || ''}</span></div>
+                        <div class="small mt-1" style="color: #b5956a;">${item.reason}</div>
+                        <div class="small text-muted mt-1">最後來店: ${item.lastVisit}</div>
                     </div>`;
             });
         });
@@ -265,6 +301,7 @@
 
         const payload = {
             name: document.getElementById('formName').value, phone: document.getElementById('formPhone').value,
+            birthday: document.getElementById('formBirthday').value, // 傳送生日
             gender: document.getElementById('formGender').value, hairLength: document.getElementById('formHair').value,
             date: document.getElementById('formDate').value, services: services,
             formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
@@ -274,7 +311,7 @@
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'addRecord', payload: payload }) })
         .then(res => res.json()).then(data => {
             if(data.status === 'success') {
-                alert('紀錄已儲存！'); document.getElementById('recordForm').reset();
+                document.getElementById('recordForm').reset();
                 bootstrap.Modal.getInstance(document.getElementById('addRecordModal')).hide();
                 loadDashboard(); 
             } else alert('錯誤: ' + data.message);
