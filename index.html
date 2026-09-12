@@ -44,6 +44,10 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d4b996; border-radius: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c8a97e; }
 
+        /* ⭐ 全新設計的超高質感玻璃儀表板 */
+        .stats-card { background: linear-gradient(135deg, #C8A97E, #b5956a); color: white; border-radius: 20px; padding: 22px; box-shadow: 0 8px 20px rgba(200,169,126,0.25); }
+        .stats-mini-box { background: rgba(255,255,255,0.18); border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
+
         .fc a, .fc a:hover { color: inherit !important; text-decoration: none !important; cursor: pointer; }
         .fc .fc-toolbar-title { font-family: 'Noto Serif TC', serif; font-size: 1.15rem !important; color: var(--text-dark); }
         .fc-theme-standard td, .fc-theme-standard th { border-color: #f0f0f0 !important; }
@@ -65,29 +69,38 @@
         <span id="todayDate" class="text-muted small"></span>
     </div>
 
-    <!-- ⭐ 全新：首頁頂端戰情儀表板 -->
+    <!-- ⭐ 絕美半透明玻璃卡片戰情室 -->
     <div class="row mb-3">
         <div class="col-12">
-            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #b5956a, #C8A97E); color: white; border-radius: 16px;">
-                <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
                     <div>
-                        <h6 class="m-0 fw-bold opacity-75 mb-1" id="topStatsMonthTitle">本月營業總額</h6>
-                        <h2 class="m-0 fw-bold">$<span id="topStatsRev">0</span></h2>
+                        <div class="small opacity-75 fw-bold mb-1" id="topStatsMonthTitle" style="font-size: 0.85rem;">本月營業總額</div>
+                        <h2 class="m-0 fw-bold" style="letter-spacing: 1px;">$<span id="topStatsRev">0</span></h2>
                     </div>
-                    <div class="d-flex gap-4 align-items-center flex-wrap">
-                        <div class="text-end text-md-start">
-                            <div class="opacity-75 small mb-1">來客總數 (人次)</div>
-                            <h4 class="m-0 fw-bold"><span id="topStatsVisits">0</span> <small class="fs-6 fw-normal">次</small></h4>
+                    <button class="btn btn-light btn-sm text-primary rounded-pill shadow-sm px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#statsModal" style="font-size: 0.85rem;">
+                        🔍 歷史查詢
+                    </button>
+                </div>
+                
+                <div class="row g-2">
+                    <div class="col-4">
+                        <div class="stats-mini-box">
+                            <div class="small opacity-75 mb-1" style="font-size: 0.75rem;">總來客</div>
+                            <div class="fw-bold"><span id="topStatsVisits" class="fs-5">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">次</small></div>
                         </div>
-                        <div class="text-end text-md-start">
-                            <div class="opacity-75 small mb-1">獨立客數 (新/舊)</div>
-                            <div class="d-flex gap-1 align-items-center">
-                                <span class="badge bg-white text-dark shadow-sm">👤 共 <span id="topStatsUnique">0</span> 人</span>
-                                <span class="badge bg-white text-success shadow-sm">🌱 新 <span id="topStatsNew">0</span></span>
-                                <span class="badge bg-white text-secondary shadow-sm">🌟 舊 <span id="topStatsOld">0</span></span>
-                            </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stats-mini-box">
+                            <div class="small opacity-75 mb-1" style="font-size: 0.75rem;">舊客回流</div>
+                            <div class="fw-bold"><span id="topStatsOld" class="fs-5">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">人</small></div>
                         </div>
-                        <button class="btn btn-light btn-sm fw-bold text-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#statsModal">🔍 歷史查詢</button>
+                    </div>
+                    <div class="col-4">
+                        <div class="stats-mini-box">
+                            <div class="small opacity-75 mb-1" style="font-size: 0.75rem;">新客數</div>
+                            <div class="fw-bold"><span id="topStatsNew" class="fs-5">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">人</small></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -95,7 +108,7 @@
     </div>
 
     <div class="row">
-        <!-- 待聯繫名單 (手機版自動移到最上方 order-1) -->
+        <!-- 待聯繫名單 (手機版 order-1 在上) -->
         <div class="col-lg-4 order-1 order-lg-2 mb-4 mb-lg-0">
             <div class="card h-100 shadow-sm" style="background: #ffffff;">
                 <div class="card-header text-dark border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
@@ -110,7 +123,7 @@
             </div>
         </div>
 
-        <!-- 左側主要區塊 (手機版自動排在下面 order-2) -->
+        <!-- 左側主要區塊 (手機版 order-2 在下) -->
         <div class="col-lg-8 order-2 order-lg-1">
             <div class="compact-recommend-bar">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
@@ -212,7 +225,6 @@
     </div>
 </div>
 
-<!-- ⭐ 新增：歷史營收查詢 Modal -->
 <div class="modal fade" id="statsModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content" style="border-radius: 16px;">
@@ -360,13 +372,12 @@
                 renderDataList(data.data.customers);
                 initCalendar(data.data.events);
                 
-                // ⭐ 渲染首頁頂部戰情儀表板
+                // ⭐ 渲染全新玻璃卡片儀表板
                 let st = data.data.statsData;
                 let monthArr = st.month.split('-');
-                document.getElementById('topStatsMonthTitle').innerText = `${monthArr[0]}年 ${parseInt(monthArr[1])}月 總業績`;
+                document.getElementById('topStatsMonthTitle').innerText = `${monthArr[0]}年 ${parseInt(monthArr[1])}月 營業總額`;
                 document.getElementById('topStatsRev').innerText = st.revenue.toLocaleString();
                 document.getElementById('topStatsVisits').innerText = st.visits;
-                document.getElementById('topStatsUnique').innerText = st.uniqueCust;
                 document.getElementById('topStatsNew').innerText = st.newCust;
                 document.getElementById('topStatsOld').innerText = st.oldCust;
             }
@@ -439,7 +450,6 @@
         calendar.render();
     }
 
-    // ⭐ 將話術生成的邏輯獨立出來，給一鍵LINE按鈕共用
     function getMessageText(btn) {
         const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
         const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
@@ -473,7 +483,7 @@
         return `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
     }
 
-    // ⭐ 全新：一鍵複製並開啟 LINE
+    // ⭐ 一鍵自動複製並喚醒 LINE APP
     function copyAndLine(btn) {
         let msg = getMessageText(btn);
         let lineId = btn.getAttribute('data-line');
@@ -519,11 +529,11 @@
                     let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                     let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                     
-                    // ⭐ 完美的按鈕切換邏輯
+                    // ⭐ 只顯示一顆按鈕，有 LINE 顯示綠色，沒 LINE 顯示白色
                     let actionHtml = '';
                     if (!g.noMsg) {
                         if (item.lineId) {
-                            actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
+                            actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1 shadow-sm fw-bold" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px; border:none;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
                         } else {
                             actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyAndLine(this)">📋 話術</button>`;
                         }
@@ -671,10 +681,9 @@
                 let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                 let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                 
-                // ⭐ 同樣切換邏輯
                 let actionHtml = '';
                 if (item.lineId) {
-                    actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
+                    actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2 shadow-sm fw-bold" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px; border:none;" data-type="${actTag}" data-name="${item.name}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
                 } else {
                     actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyAndLine(this)">📋 話術</button>`;
                 }
