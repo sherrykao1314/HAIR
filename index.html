@@ -65,7 +65,52 @@
         <span id="todayDate" class="text-muted small"></span>
     </div>
 
+    <!-- ⭐ 全新：首頁頂端戰情儀表板 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #b5956a, #C8A97E); color: white; border-radius: 16px;">
+                <div class="card-body p-3 p-md-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h6 class="m-0 fw-bold opacity-75 mb-1" id="topStatsMonthTitle">本月營業總額</h6>
+                        <h2 class="m-0 fw-bold">$<span id="topStatsRev">0</span></h2>
+                    </div>
+                    <div class="d-flex gap-4 align-items-center flex-wrap">
+                        <div class="text-end text-md-start">
+                            <div class="opacity-75 small mb-1">來客總數 (人次)</div>
+                            <h4 class="m-0 fw-bold"><span id="topStatsVisits">0</span> <small class="fs-6 fw-normal">次</small></h4>
+                        </div>
+                        <div class="text-end text-md-start">
+                            <div class="opacity-75 small mb-1">獨立客數 (新/舊)</div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <span class="badge bg-white text-dark shadow-sm">👤 共 <span id="topStatsUnique">0</span> 人</span>
+                                <span class="badge bg-white text-success shadow-sm">🌱 新 <span id="topStatsNew">0</span></span>
+                                <span class="badge bg-white text-secondary shadow-sm">🌟 舊 <span id="topStatsOld">0</span></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-light btn-sm fw-bold text-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#statsModal">🔍 歷史查詢</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
+        <!-- 待聯繫名單 (手機版自動移到最上方 order-1) -->
+        <div class="col-lg-4 order-1 order-lg-2 mb-4 mb-lg-0">
+            <div class="card h-100 shadow-sm" style="background: #ffffff;">
+                <div class="card-header text-dark border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="serif m-0" style="font-size: 1.1rem;">🎯 待聯繫名單</h5>
+                        <small class="text-danger fw-normal" style="font-size: 0.8rem;">打勾確認後才會隱藏</small>
+                    </div>
+                </div>
+                <div class="card-body p-3 mt-1" id="reminderList">
+                    <div class="text-center text-muted spinner-border spinner-border-sm" role="status"></div> 讀取中...
+                </div>
+            </div>
+        </div>
+
+        <!-- 左側主要區塊 (手機版自動排在下面 order-2) -->
         <div class="col-lg-8 order-2 order-lg-1">
             <div class="compact-recommend-bar">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
@@ -164,21 +209,29 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="col-lg-4 order-1 order-lg-2 mb-4 mb-lg-0">
-            <div class="card h-100 shadow-sm" style="background: #ffffff;">
-                <div class="card-header text-dark border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="serif m-0" style="font-size: 1.1rem;">🎯 待聯繫名單</h5>
-                        <small class="text-danger fw-normal" style="font-size: 0.8rem;">打勾確認後才會隱藏</small>
-                    </div>
-                </div>
-                <div class="card-body p-3 mt-1" id="reminderList">
-                    <div class="text-center text-muted spinner-border spinner-border-sm" role="status"></div> 讀取中...
+<!-- ⭐ 新增：歷史營收查詢 Modal -->
+<div class="modal fade" id="statsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold text-dark">📊 歷史營收查詢</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="month" id="statsMonthInput" class="form-control mb-3">
+                <button class="btn btn-custom w-100" id="statsQueryBtn" onclick="queryHistoricalStats()">查詢</button>
+                <div id="historicalStatsResult" class="mt-3 p-3 bg-light rounded-3 shadow-sm" style="display:none;">
+                    <div class="text-center fw-bold text-secondary mb-2" id="histMonthLabel"></div>
+                    <h3 class="text-center text-primary fw-bold mb-3">$<span id="histRev">0</span></h3>
+                    <div class="d-flex justify-content-between small text-muted mb-1"><span>來客總數</span><strong id="histVisits" class="text-dark">0 次</strong></div>
+                    <div class="d-flex justify-content-between small text-muted mb-1"><span>獨立客數</span><strong id="histUnique" class="text-dark">0 人</strong></div>
+                    <div class="d-flex justify-content-between small text-muted"><span>新客 / 舊客</span><strong class="text-dark"><span id="histNew" class="text-success">0</span> / <span id="histOld" class="text-secondary">0</span></strong></div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -232,7 +285,6 @@
                         <option value="長髮">長髮</option>
                     </select>
                 </div>
-                <!-- ⭐ 新增：LINE ID 欄位 -->
                 <div class="col-md-3">
                     <label class="form-label text-muted small">LINE 名稱/ID</label>
                     <input type="text" class="form-control" id="formLineId" placeholder="有填才會有按鈕">
@@ -307,7 +359,39 @@
                 renderReminders(data.data.reminders);
                 renderDataList(data.data.customers);
                 initCalendar(data.data.events);
+                
+                // ⭐ 渲染首頁頂部戰情儀表板
+                let st = data.data.statsData;
+                let monthArr = st.month.split('-');
+                document.getElementById('topStatsMonthTitle').innerText = `${monthArr[0]}年 ${parseInt(monthArr[1])}月 總業績`;
+                document.getElementById('topStatsRev').innerText = st.revenue.toLocaleString();
+                document.getElementById('topStatsVisits').innerText = st.visits;
+                document.getElementById('topStatsUnique').innerText = st.uniqueCust;
+                document.getElementById('topStatsNew').innerText = st.newCust;
+                document.getElementById('topStatsOld').innerText = st.oldCust;
             }
+        });
+    }
+
+    function queryHistoricalStats() {
+        const monthInput = document.getElementById('statsMonthInput').value;
+        if (!monthInput) return alert('請選擇月份');
+        const btn = document.getElementById('statsQueryBtn');
+        btn.innerText = '讀取中...'; btn.disabled = true;
+        
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getMonthlyStats', payload: monthInput }) })
+        .then(res => res.json()).then(data => {
+            if(data.status === 'success') {
+                let st = data.data;
+                document.getElementById('histMonthLabel').innerText = `${st.month} 營收統計`;
+                document.getElementById('histRev').innerText = st.revenue.toLocaleString();
+                document.getElementById('histVisits').innerText = st.visits + ' 次';
+                document.getElementById('histUnique').innerText = st.uniqueCust + ' 人';
+                document.getElementById('histNew').innerText = st.newCust;
+                document.getElementById('histOld').innerText = st.oldCust;
+                document.getElementById('historicalStatsResult').style.display = 'block';
+            }
+            btn.innerText = '查詢'; btn.disabled = false;
         });
     }
 
@@ -355,40 +439,52 @@
         calendar.render();
     }
 
-    function copyMsg(btn) {
+    // ⭐ 將話術生成的邏輯獨立出來，給一鍵LINE按鈕共用
+    function getMessageText(btn) {
         const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
         const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
-        let msg = '';
         
-        if (type === 'birthday') msg = `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
-        else if (type === 'referral') msg = `嗨 ${name}！你的朋友 ${ref} 前幾天來找我弄頭髮囉，超級感謝你的推薦！下次你來找我，我幫你準備專屬的感恩升級優惠喔！💕`;
-        else if (type === 'firstRescue') msg = `嗨 ${name}！距離上次幫你服務過了一陣子，最近頭髮還習慣嗎？Fisher 針對新朋友有提供專屬的回娘家優惠，最近有空想回來整理頭髮嗎？✨`;
-        else if (type === 'day2') msg = `嗨 ${name}，我是Fisher！前兩天幫你弄完頭髮，自己整理還順利嗎？有問題隨時跟我說喔！😉`;
-        else if (type === 'day7') msg = `嗨 ${name}，我是Fisher！染髮過了一個禮拜，髮色還喜歡嗎？記得水溫不要太高喔！✨`;
-        else if (type === 'product') msg = `嗨 ${name}，我是Fisher！上次帶的「${prod}」是不是快用完了呢？需要幫你預留一罐嗎？🧴`;
+        if (type === 'birthday') return `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
+        if (type === 'referral') return `嗨 ${name}！你的朋友 ${ref} 前幾天來找我弄頭髮囉，超級感謝你的推薦！下次你來找我，我幫你準備專屬的感恩升級優惠喔！💕`;
+        if (type === 'firstRescue') return `嗨 ${name}！距離上次幫你服務過了一陣子，最近頭髮還習慣嗎？Fisher 針對新朋友有提供專屬的回娘家優惠，最近有空想回來整理頭髮嗎？✨`;
+        if (type === 'day2') return `嗨 ${name}，我是Fisher！前兩天幫你弄完頭髮，自己整理還順利嗎？有問題隨時跟我說喔！😉`;
+        if (type === 'day7') return `嗨 ${name}，我是Fisher！染髮過了一個禮拜，髮色還喜歡嗎？記得水溫不要太高喔！✨`;
+        if (type === 'product') return `嗨 ${name}，我是Fisher！上次帶的「${prod}」是不是快用完了呢？需要幫你預留一罐嗎？🧴`;
         
-        else if (type === 'rec_cut') msg = `嗨 ${name}，我是Fisher！算算時間你的頭髮應該變長變厚囉，最近有空要回來修剪一下，恢復俐落感嗎？💇‍♀️`;
-        else if (type === 'rec_dye') msg = `嗨 ${name}，我是Fisher！算算時間你的頭髮應該褪色或有布丁頭囉，最近有空要回來補染或換個新髮色嗎？🎨`;
-        else if (type === 'rec_perm') msg = `嗨 ${name}，我是Fisher！距離上次燙髮過了一陣子，捲度應該差不多塌下來了，最近要回來重新整理捲度嗎？🌊`;
-        else if (type === 'rec_treat') msg = `嗨 ${name}，我是Fisher！最近頭髮還好整理嗎？要不要抽空回來做個深層護髮，保養一下髮質呢？🌿`;
+        if (type === 'rec_cut') return `嗨 ${name}，我是Fisher！算算時間你的頭髮應該變長變厚囉，最近有空要回來修剪一下，恢復俐落感嗎？💇‍♀️`;
+        if (type === 'rec_dye') return `嗨 ${name}，我是Fisher！算算時間你的頭髮應該褪色或有布丁頭囉，最近有空要回來補染或換個新髮色嗎？🎨`;
+        if (type === 'rec_perm') return `嗨 ${name}，我是Fisher！距離上次燙髮過了一陣子，捲度應該差不多塌下來了，最近要回來重新整理捲度嗎？🌊`;
+        if (type === 'rec_treat') return `嗨 ${name}，我是Fisher！最近頭髮還好整理嗎？要不要抽空回來做個深層護髮，保養一下髮質呢？🌿`;
         
-        else if (type === 'fest_jan') msg = `嗨 ${name}！過年前的預約表大戰準備開打啦🧨 因為你是 Fisher 的專屬 VIP，我特別提早把熱門時段先保留給你！想卡位哪一天呢？趕快跟我說！💪`;
-        else if (type === 'fest_feb') msg = `嗨 ${name}！情人節快到囉🌸 最近 Fisher 進了超美的新髮色，幫你換個微捲造型或是招桃花髮色，去約會絕對超加分！最近有空來變美嗎？✨`;
-        else if (type === 'fest_mar') msg = `嗨 ${name}！最近換季天氣忽冷忽熱，頭皮是不是容易乾癢出油呢？🌱 Fisher 推出了春季頭皮深層理療，有空來找我放鬆一下保養頭皮吧！💆‍♀️`;
-        else if (type === 'fest_apr') msg = `嗨 ${name}！天氣漸熱囉☀️ 你的頭髮應該變厚重了，最近有空來找 Fisher 修剪，或換個輕盈透亮的新髮色嗎？讓整個春夏清爽起來！💇‍♀️`;
-        else if (type === 'fest_may') msg = `嗨 ${name}！母親節快到囉🌷 平常辛苦了，Fisher 推出『母親節專屬/母女同行』優惠！帶媽媽一起來換新髮型，或來個深層護理寵愛自己一下吧！☕️`;
-        else if (type === 'fest_jun') msg = `嗨 ${name}！畢業求職季到囉🎓 來找 Fisher 幫你換個俐落的面試必勝髮型，或是染個超有質感的深色調，讓面試官一眼就記住你！💪`;
-        else if (type === 'fest_jul') msg = `嗨 ${name}！夏天出遊拍照季到囉🏖️ 準備好換個清爽的新造型或是亮眼髮色出去玩了嗎？Fisher 這邊還有夏日頭皮控油跟防曬護理，有空來找我整理一下吧！✨`;
-        else if (type === 'fest_aug_father') msg = `嗨 ${name}！父親節快到囉👔 Fisher 推出了男士專屬俐落剪裁與頭皮紓壓方案！趁過節來好好放鬆，或是請家人幫你預約大改造吧！💪`;
-        else if (type === 'fest_aug_vday') msg = `嗨 ${name}！七夕情人節快到囉💖 準備好去哪裡約會了嗎？來找 Fisher 幫你換個浪漫微捲燙或是招桃花髮色，保證讓另一半眼睛一亮！✨`;
-        else if (type === 'fest_sep') msg = `嗨 ${name}！最近天氣開始轉涼囉🍁 算算時間頭髮應該褪色了，Fisher 最近進了超美的秋季限定色，超級顯白！有空想回來換個秋裝嗎？✨`;
-        else if (type === 'fest_oct') msg = `嗨 ${name}！經歷了夏天的烈日跟玩水，頭髮是不是變得比較毛躁呢？🍂 Fisher 推出了曬後深層急救『高階結構式護髮』，幫你把髮質完美救回來！💆‍♀️`;
-        else if (type === 'fest_nov') msg = `嗨 ${name}！百貨週年慶開跑啦🛍️ Fisher 幫你爭取到了超殺的沙龍級髮品囤貨優惠！大瓶裝折扣比外面便宜超多，需要我幫你預留幾組嗎？賣完就沒囉！🏃‍♀️`;
-        else if (type === 'fest_dec') msg = `嗨 ${name}！聖誕跨年趴踢準備好閃耀了嗎？🎄 Fisher 準備了年末派對大改造與頂級光澤護理，讓你成為全場焦點！年末預約比較滿，趕快先跟我卡位喔！✨`;
+        if (type === 'fest_jan') return `嗨 ${name}！過年前的預約表大戰準備開打啦🧨 因為你是 Fisher 的專屬 VIP，我特別提早把熱門時段先保留給你！想卡位哪一天呢？趕快跟我說！💪`;
+        if (type === 'fest_feb') return `嗨 ${name}！情人節快到囉🌸 最近 Fisher 進了超美的新髮色，幫你換個微捲造型或是招桃花髮色，去約會絕對超加分！最近有空來變美嗎？✨`;
+        if (type === 'fest_mar') return `嗨 ${name}！最近換季天氣忽冷忽熱，頭皮是不是容易乾癢出油呢？🌱 Fisher 推出了春季頭皮深層理療，有空來找我放鬆一下保養頭皮吧！💆‍♀️`;
+        if (type === 'fest_apr') return `嗨 ${name}！天氣漸熱囉☀️ 你的頭髮應該變厚重了，最近有空來找 Fisher 修剪，或換個輕盈透亮的新髮色嗎？讓整個春夏清爽起來！💇‍♀️`;
+        if (type === 'fest_may') return `嗨 ${name}！母親節快到囉🌷 平常辛苦了，Fisher 推出『母親節專屬/母女同行』優惠！帶媽媽一起來換新髮型，或來個深層護理寵愛自己一下吧！☕️`;
+        if (type === 'fest_jun') return `嗨 ${name}！畢業求職季到囉🎓 來找 Fisher 幫你換個俐落的面試必勝髮型，或是染個超有質感的深色調，讓面試官一眼就記住你！💪`;
+        if (type === 'fest_jul') return `嗨 ${name}！夏天出遊拍照季到囉🏖️ 準備好換個清爽的新造型或是亮眼髮色出去玩了嗎？Fisher 這邊還有夏日頭皮控油跟防曬護理，有空來找我整理一下吧！✨`;
+        if (type === 'fest_aug_father') return `嗨 ${name}！父親節快到囉👔 Fisher 推出了男士專屬俐落剪裁與頭皮紓壓方案！趁過節來好好放鬆，或是請家人幫你預約大改造吧！💪`;
+        if (type === 'fest_aug_vday') return `嗨 ${name}！七夕情人節快到囉💖 準備好去哪裡約會了嗎？來找 Fisher 幫你換個浪漫微捲燙或是招桃花髮色，保證讓另一半眼睛一亮！✨`;
+        if (type === 'fest_sep') return `嗨 ${name}！最近天氣開始轉涼囉🍁 算算時間頭髮應該褪色了，Fisher 最近進了超美的秋季限定色，超級顯白！有空想回來換個秋裝嗎？✨`;
+        if (type === 'fest_oct') return `嗨 ${name}！經歷了夏天的烈日跟玩水，頭髮是不是變得比較毛躁呢？🍂 Fisher 推出了曬後深層急救『高階結構式護髮』，幫你把髮質完美救回來！💆‍♀️`;
+        if (type === 'fest_nov') return `嗨 ${name}！百貨週年慶開跑啦🛍️ Fisher 幫你爭取到了超殺的沙龍級髮品囤貨優惠！大瓶裝折扣比外面便宜超多，需要我幫你預留幾組嗎？賣完就沒囉！🏃‍♀️`;
+        if (type === 'fest_dec') return `嗨 ${name}！聖誕跨年趴踢準備好閃耀了嗎？🎄 Fisher 準備了年末派對大改造與頂級光澤護理，讓你成為全場焦點！年末預約比較滿，趕快先跟我卡位喔！✨`;
         
-        else msg = `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
+        return `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
+    }
+
+    // ⭐ 全新：一鍵複製並開啟 LINE
+    function copyAndLine(btn) {
+        let msg = getMessageText(btn);
+        let lineId = btn.getAttribute('data-line');
         
-        navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！'));
+        navigator.clipboard.writeText(msg).then(() => {
+            if (lineId && lineId !== 'undefined' && lineId !== 'null' && lineId !== '') {
+                window.open('https://line.me/R/', '_blank'); 
+            } else {
+                alert('✅ 專屬話術已複製！請去 LINE 貼上傳送');
+            }
+        });
     }
 
     function renderReminders(r) {
@@ -423,18 +519,21 @@
                     let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                     let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                     
-                    // ⭐ 這裡加入了 LINE 開啟按鈕，有填資料才會出現！
-                    let lineBtnHtml = item.lineId ? `<a href="https://line.me/R/" target="_blank" class="btn btn-sm px-2 py-1 ms-1 text-decoration-none" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px;" title="搜尋: ${item.lineId}">💬 LINE</a>` : '';
-                    let msgBtnHtml = g.noMsg ? '' : `<button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyMsg(this)">📋 話術</button>`;
+                    // ⭐ 完美的按鈕切換邏輯
+                    let actionHtml = '';
+                    if (!g.noMsg) {
+                        if (item.lineId) {
+                            actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
+                        } else {
+                            actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyAndLine(this)">📋 話術</button>`;
+                        }
+                    }
                     
                     container.innerHTML += `
                     <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
                         <div><strong class="text-dark">${item.name}</strong> ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${srvBadge}<br><small style="color: #a39589;">${dateInfo}</small></div>
                         <div class="d-flex flex-column align-items-end gap-1">
-                            <div class="d-flex gap-1">
-                                ${msgBtnHtml}
-                                ${lineBtnHtml}
-                            </div>
+                            ${actionHtml}
                             <div class="form-check m-0 mt-1"><input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${finalTag}', '${g.type}', this)"></div>
                         </div>
                     </div>`;
@@ -572,8 +671,13 @@
                 let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                 let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                 
-                // ⭐ 行銷推薦名單也加入 LINE 按鈕
-                let lineBtnHtml = item.lineId ? `<a href="https://line.me/R/" target="_blank" class="btn btn-sm px-2 py-1 ms-1 text-decoration-none" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px;" title="搜尋: ${item.lineId}">💬 LINE</a>` : '';
+                // ⭐ 同樣切換邏輯
+                let actionHtml = '';
+                if (item.lineId) {
+                    actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
+                } else {
+                    actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyAndLine(this)">📋 話術</button>`;
+                }
 
                 list.innerHTML += `
                     <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
@@ -582,10 +686,7 @@
                                 <div class="fw-bold text-dark">${item.name} ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
                                 <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
                             </div>
-                            <div class="d-flex gap-1">
-                                <button class="btn btn-sm px-2 py-1 flex-shrink-0" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyMsg(this)">📋 話術</button>
-                                ${lineBtnHtml}
-                            </div>
+                            ${actionHtml}
                         </div>
                         ${warningHtml}
                     </div>`;
@@ -632,7 +733,7 @@
             hairLength: document.getElementById('formHair').value, ageRange: document.getElementById('formAge').value,
             lifestyle: document.getElementById('formLifestyle').value, hairCondition: hairConds.join(','),
             date: document.getElementById('formDate').value, referrer: document.getElementById('formReferrer').value,
-            lineId: document.getElementById('formLineId').value, // ⭐ 傳送 LINE ID 到後端
+            lineId: document.getElementById('formLineId').value,
             services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
             products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
             photos: []
