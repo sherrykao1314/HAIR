@@ -55,7 +55,6 @@
         .fc-daygrid-day-number { color: #8e7d71 !important; font-weight: 500; padding: 6px !important; }
         .fc-day-today { background-color: #fff9f0 !important; }
         
-        /* ⭐ 優化：讓行事曆上的按鈕可以明顯被點擊，並移除邊框 */
         .fc-event { border: none !important; border-radius: 5px !important; padding: 3px 6px !important; font-size: 0.85rem; cursor: pointer; transition: transform 0.1s; }
         .fc-event:hover { transform: scale(1.02); filter: brightness(0.95); }
         
@@ -460,7 +459,6 @@
         }
     }
 
-    // ⭐ 升級版行事曆：加入點擊自動搜尋的功能！
     function initCalendar(eventsData) {
         const calendarEl = document.getElementById('calendar');
         if(calendar) { calendar.destroy(); }
@@ -473,11 +471,9 @@
             eventClick: function(info) {
                 const custName = info.event.extendedProps.searchName;
                 if(custName) {
-                    // 自動把名字填入搜尋框，清空標籤過濾器，然後觸發搜尋
                     document.getElementById('searchInput').value = custName;
                     document.getElementById('searchTagFilter').value = ""; 
                     searchCustomer();
-                    // 在手機版上，自動往下捲動到搜尋結果區塊
                     document.getElementById('historyArea').scrollIntoView({ behavior: 'smooth' });
                 }
             }
@@ -627,6 +623,15 @@
             if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到符合條件的顧客紀錄</p>'; return; }
             data.data.forEach(cust => {
                 let recordsHtml = '';
+                
+                // ⭐ 為了讓搜尋結果包含按鈕，我們在這裡加入 LINE 的按鈕判定
+                let actionHtml = '';
+                if (cust.lineId) {
+                    actionHtml = `<button class="btn btn-sm px-3 py-1 shadow-sm fw-bold mt-2" style="background:#06C755; color:white; font-size:0.8rem; border-radius:8px; border:none;" data-type="default" data-name="${cust.name}" data-line="${cust.lineId}" onclick="copyAndLine(this)">💬 LINE 聯絡</button>`;
+                } else {
+                    actionHtml = `<button class="btn btn-sm px-3 py-1 shadow-sm mt-2" style="background:#f4eee8; color:#8e7d71; font-size:0.8rem; border-radius:8px; border:none;" data-type="default" data-name="${cust.name}" onclick="copyAndLine(this)">📋 複製話術</button>`;
+                }
+
                 cust.records.forEach(item => {
                     let photoUrls = item.photo ? item.photo.split(',').map(u => u.trim()).filter(u => u) : [];
                     let photoHtml = '';
@@ -660,7 +665,9 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <strong class="fs-5">${cust.name}</strong> <span class="ms-1">${cust.nameBadgesHtml}</span>
+                                <div class="text-muted small mt-1 fw-bold">📞 ${cust.phone}</div>
                             </div>
+                            ${actionHtml}
                         </div>
                         <div class="mt-2 mb-1 lh-base">${cust.detailBadgesHtml}</div>
                         <div class="mt-2 pt-2 border-top">
@@ -668,7 +675,7 @@
                                 <span>📜 消費歷程 (${cust.records.length}筆)</span>
                             </div>
                             <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
-                                ${recordsHtml ? recordsHtml : '<div class="text-muted small">尚無消費紀錄</div>'}
+                                ${recordsHtml ? recordsHtml : '<div class="text-muted small mt-2">尚無消費紀錄，趕緊聯絡他預約吧！✨</div>'}
                             </div>
                         </div>
                     </div>`;
