@@ -39,7 +39,6 @@
         .vip-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; background: linear-gradient(45deg, #C8A97E, #e8d5b5); color: #fff; font-weight: bold; margin-left: 4px; }
         .warning-text { color: #d63031; font-size: 0.8rem; font-weight: bold; margin-top: 4px; background: #ffeaa7; padding: 3px 6px; border-radius: 4px; display: inline-block; }
         
-        /* ⭐ 自訂精美滾動條，讓客戶歷程匣看起來很專業 */
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d4b996; border-radius: 5px; }
@@ -66,8 +65,11 @@
         <span id="todayDate" class="text-muted small"></span>
     </div>
 
+    <!-- ⭐ 加入 Bootstrap 的響應式排序 classes (order-2 order-lg-1 / order-1 order-lg-2) -->
     <div class="row">
-        <div class="col-lg-8">
+        
+        <!-- ================= 左側主要區塊 (手機版會自動排到下面) ================= -->
+        <div class="col-lg-8 order-2 order-lg-1">
             <div class="compact-recommend-bar">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                     <div class="d-flex align-items-center gap-1 text-secondary small fw-bold">
@@ -115,7 +117,6 @@
                 <div class="card-header"><span style="font-size: 1.1rem;">📅</span> 客戶搜尋與預約總覽</div>
                 <div class="card-body p-3">
                     <div class="input-group mb-3 shadow-sm" style="border-radius: 10px; overflow: hidden;">
-                        <!-- ⭐ 更新：下拉篩選器更細緻的分類與長度支援 -->
                         <select class="form-select border-0 bg-light" id="searchTagFilter" style="max-width: 135px; font-size:0.9rem;">
                             <option value="">所有標籤</option>
                             <optgroup label="客戶分級">
@@ -167,7 +168,8 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
+        <!-- ================= 右側待聯繫名單 (手機版會優先顯示在最上面) ================= -->
+        <div class="col-lg-4 order-1 order-lg-2 mb-4 mb-lg-0">
             <div class="card h-100 shadow-sm" style="background: #ffffff;">
                 <div class="card-header text-dark border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
                     <div>
@@ -180,6 +182,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -454,7 +457,6 @@
         return '';
     }
 
-    // ⭐ 更新：全新「歷程收納匣」與高度壓縮版面
     function searchCustomer() {
         const keyword = document.getElementById('searchInput').value;
         const filterTag = document.getElementById('searchTagFilter').value;
@@ -486,7 +488,6 @@
                         photoHtml += '</div>';
                     }
                     
-                    // ⭐ 縮小並緊湊化每一筆消費紀錄
                     recordsHtml += `
                         <div class="mb-2 ps-2 border-start border-3" style="border-color: #e0e0e0 !important; padding-bottom: 8px;">
                             <div class="d-flex justify-content-between align-items-center">
@@ -512,7 +513,6 @@
                             <div class="text-muted small mb-2 fw-bold d-flex justify-content-between align-items-center">
                                 <span>📜 消費歷程 (${cust.records.length}筆)</span>
                             </div>
-                            <!-- ⭐ 加入可滾動的歷程匣 -->
                             <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
                                 ${recordsHtml ? recordsHtml : '<div class="text-muted small">尚無消費紀錄</div>'}
                             </div>
