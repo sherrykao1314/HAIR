@@ -65,10 +65,7 @@
         <span id="todayDate" class="text-muted small"></span>
     </div>
 
-    <!-- ⭐ 加入 Bootstrap 的響應式排序 classes (order-2 order-lg-1 / order-1 order-lg-2) -->
     <div class="row">
-        
-        <!-- ================= 左側主要區塊 (手機版會自動排到下面) ================= -->
         <div class="col-lg-8 order-2 order-lg-1">
             <div class="compact-recommend-bar">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
@@ -168,7 +165,6 @@
             </div>
         </div>
 
-        <!-- ================= 右側待聯繫名單 (手機版會優先顯示在最上面) ================= -->
         <div class="col-lg-4 order-1 order-lg-2 mb-4 mb-lg-0">
             <div class="card h-100 shadow-sm" style="background: #ffffff;">
                 <div class="card-header text-dark border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
@@ -182,7 +178,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -204,11 +199,12 @@
                     <datalist id="formCustomerList"></datalist>
                 </div>
                 <div class="col-md-3"><label class="form-label text-muted small">電話</label><input type="text" class="form-control" id="formPhone"></div>
-                <div class="col-md-3"><label class="form-label text-muted small">生日 (選填)</label><input type="text" class="form-control" id="formBirthday" placeholder="例: 12/17"></div>
-                <div class="col-md-3"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
+                <div class="col-md-3"><label class="form-label text-muted small">生日 (例: 12/17)</label><input type="text" class="form-control" id="formBirthday" placeholder="12/17"></div>
+                <div class="col-md-3"><label class="form-label text-muted small">LINE ID</label><input type="text" class="form-control" id="formLineId" placeholder="對方LINE ID"></div>
             </div>
             
             <div class="row mb-3">
+                <div class="col-md-3"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
                 <div class="col-md-3">
                     <label class="form-label text-muted small">年齡層</label>
                     <select class="form-select" id="formAge">
@@ -236,11 +232,10 @@
                         <option value="長髮">長髮</option>
                     </select>
                 </div>
-                <div class="col-md-3"><label class="form-label text-muted small">消費日</label><input type="date" class="form-control" id="formDate" required></div>
             </div>
             
             <div class="mb-3 bg-light p-3 rounded-3 border" style="border-color: #f0e6da !important;">
-                <label class="form-label text-muted small d-block mb-2">髮質與頭皮狀況 (可複選，自動覆蓋舊資料)</label>
+                <label class="form-label text-muted small d-block mb-2">髮質與頭皮狀況 (可複選)</label>
                 <div class="d-flex flex-wrap gap-3">
                     <div class="form-check"><input class="form-check-input hc-cb" type="checkbox" value="細軟髮" id="hc1"><label class="form-check-label small" for="hc1">細軟髮</label></div>
                     <div class="form-check"><input class="form-check-input hc-cb" type="checkbox" value="粗硬髮" id="hc2"><label class="form-check-label small" for="hc2">粗硬髮</label></div>
@@ -255,8 +250,9 @@
             </div>
 
             <div class="row mb-3">
-                <div class="col-md-6"><label class="form-label text-muted small">介紹人 (選填)</label><input type="text" class="form-control" id="formReferrer" placeholder="推薦人姓名"></div>
-                <div class="col-md-6"><label class="form-label text-muted small">📸 上傳作品照 (可多選，秒傳壓縮)</label><input class="form-control" type="file" id="formPhoto" accept="image/*" multiple></div>
+                <div class="col-md-4"><label class="form-label text-muted small">介紹人 (選填)</label><input type="text" class="form-control" id="formReferrer" placeholder="推薦人姓名"></div>
+                <div class="col-md-4"><label class="form-label text-muted small">消費日</label><input type="date" class="form-control" id="formDate" required></div>
+                <div class="col-md-4"><label class="form-label text-muted small">📸 上傳作品照</label><input class="form-control" type="file" id="formPhoto" accept="image/*" multiple></div>
             </div>
 
             <div class="mb-3 bg-light p-3 rounded-3">
@@ -332,6 +328,7 @@
             if (cust.age) document.getElementById('formAge').value = cust.age;
             if (cust.lifestyle) document.getElementById('formLifestyle').value = cust.lifestyle;
             if (cust.referrer) document.getElementById('formReferrer').value = cust.referrer;
+            if (cust.lineId) document.getElementById('formLineId').value = cust.lineId;
             
             document.querySelectorAll('.hc-cb').forEach(cb => cb.checked = false);
             if (cust.hairCondition) {
@@ -352,9 +349,11 @@
         calendar.render();
     }
 
+    // ⭐ 更新：如果有 LINE ID，點擊後會幫你自動打開 LINE 跳到聊天畫面！
     function copyMsg(btn) {
         const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
         const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
+        const lineId = btn.getAttribute('data-lineid');
         let msg = '';
         
         if (type === 'birthday') msg = `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
@@ -385,7 +384,14 @@
         
         else msg = `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
         
-        navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！請去 LINE 貼上傳送'));
+        navigator.clipboard.writeText(msg).then(() => {
+            if (lineId) {
+                let cleanLineId = lineId.replace('@', ''); // 去除@防呆
+                window.open('https://line.me/ti/p/~' + cleanLineId, '_blank');
+            } else {
+                alert('✅ 話術已複製！請去 LINE 貼上傳送');
+            }
+        });
     }
 
     function renderReminders(r) {
@@ -415,12 +421,13 @@
                     let srvBadge = g.act === 'product' ? `<span class="badge bg-warning text-dark px-2 py-1 ms-1">${item.products}</span>` : (item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '');
                     let finalTag = item.tag ? item.tag : g.tag; 
                     let vipBadge = item.vip ? `<span class="vip-badge">${item.vip}</span>` : '';
-                    
                     let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
                     let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                     let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                     
-                    let msgBtnHtml = g.noMsg ? '' : `<button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyMsg(this)">📋 話術</button>`;
+                    // ⭐ 根據是否有 LINE ID 變更按鈕樣式
+                    let btnText = item.lineId ? '<span style="color:#28a745;">💬 開啟 LINE</span>' : '📋 話術';
+                    let msgBtnHtml = g.noMsg ? '' : `<button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px; font-weight:bold;" data-lineid="${item.lineId || ''}" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyMsg(this)">${btnText}</button>`;
                     
                     container.innerHTML += `
                     <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
@@ -564,6 +571,9 @@
                 let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                 let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                 
+                // ⭐ 根據是否有 LINE ID 變更按鈕樣式
+                let btnText = item.lineId ? '<span style="color:#28a745;">💬 開啟 LINE</span>' : '📋 話術';
+
                 list.innerHTML += `
                     <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
                         <div class="d-flex justify-content-between align-items-start">
@@ -571,7 +581,7 @@
                                 <div class="fw-bold text-dark">${item.name} ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
                                 <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
                             </div>
-                            <button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyMsg(this)">📋 話術</button>
+                            <button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px; font-weight:bold;" data-lineid="${item.lineId || ''}" data-type="${actTag}" data-name="${item.name}" onclick="copyMsg(this)">${btnText}</button>
                         </div>
                         ${warningHtml}
                     </div>`;
@@ -618,6 +628,7 @@
             hairLength: document.getElementById('formHair').value, ageRange: document.getElementById('formAge').value,
             lifestyle: document.getElementById('formLifestyle').value, hairCondition: hairConds.join(','),
             date: document.getElementById('formDate').value, referrer: document.getElementById('formReferrer').value,
+            lineId: document.getElementById('formLineId').value, // 新增 LINE ID 傳送
             services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
             products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
             photos: []
