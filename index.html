@@ -62,11 +62,10 @@
 
     <div class="row">
         <div class="col-lg-8">
-            
             <div class="compact-recommend-bar">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
                     <div class="d-flex align-items-center gap-1 text-secondary small fw-bold">
-                        <span>💡</span> <span>潛在業績推薦 (含防雷機制)</span>
+                        <span>💡</span> <span>潛在業績推薦 (含話術生成)</span>
                     </div>
                     <div class="d-flex gap-1 flex-wrap">
                         <button class="btn btn-outline-custom recommend-btn" onclick="getRecommend('剪髮')">✂️ 剪髮</button>
@@ -75,7 +74,7 @@
                         <button class="btn btn-outline-custom recommend-btn" onclick="getRecommend('護髮')">🌿 護髮</button>
                     </div>
                 </div>
-                <!-- ⭐ 節慶與主題行銷選單 (包含母親節/父親節/七夕) -->
+                
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-0" style="border-radius: 10px 0 0 10px;">🎯 全年節慶行銷</span>
                     <select class="form-select border-0 bg-light" id="festivalSelect" style="border-radius: 0 10px 10px 0;">
@@ -159,7 +158,6 @@
             </div>
             <div class="row mb-3">
                 <div class="col-md-3"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
-                <!-- ⭐ 新增年齡區間欄位 -->
                 <div class="col-md-3">
                     <label class="form-label text-muted small">年齡層</label>
                     <select class="form-select" id="formAge">
@@ -199,10 +197,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // =====================================
-    // ⚠️ 記得確保這裡是你專屬的 GAS 網址！
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKadEE9GfMYxDG6cHDz3qaUHFZx6qzG3A7Q8T2HyImWlAP5vt1K-Wn9hk51YZ369Vmug/exec';
-    // =====================================
     
     let calendar;
     let globalCustomers = [];
@@ -260,10 +255,13 @@
         calendar.render();
     }
 
+    // ⭐ 最強大的 LINE 節慶與推播話術自動生成器
     function copyMsg(btn) {
         const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
         const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
         let msg = '';
+        
+        // 待聯繫名單
         if (type === 'birthday') msg = `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
         else if (type === 'referral') msg = `嗨 ${name}！你的朋友 ${ref} 前幾天來找我弄頭髮囉，超級感謝你的推薦！下次你來找我，我幫你準備專屬的感恩升級優惠喔！💕`;
         else if (type === 'firstRescue') msg = `嗨 ${name}！距離上次幫你服務過了一陣子，最近頭髮還習慣嗎？Fisher 針對新朋友有提供專屬的回娘家優惠，最近有空想回來整理頭髮嗎？✨`;
@@ -271,7 +269,30 @@
         else if (type === 'day7') msg = `嗨 ${name}，我是Fisher！染髮過了一個禮拜，髮色還喜歡嗎？記得水溫不要太高喔！✨`;
         else if (type === 'product') msg = `嗨 ${name}，我是Fisher！上次帶的「${prod}」是不是快用完了呢？需要幫你預留一罐嗎？🧴`;
         else if (type === 'churn') msg = `嗨 ${name} 好久不見！最近過得好嗎？Fisher這邊進了新的護髮，突然想到你，有空再來找我弄頭髮喔！☕`;
+        
+        // 日常潛在業績推薦
+        else if (type === 'rec_cut') msg = `嗨 ${name}，我是Fisher！算算時間你的頭髮應該變長變厚囉，最近有空要回來修剪一下，恢復俐落感嗎？💇‍♀️`;
+        else if (type === 'rec_dye') msg = `嗨 ${name}，我是Fisher！算算時間你的頭髮應該褪色或有布丁頭囉，最近有空要回來補染或換個新髮色嗎？🎨`;
+        else if (type === 'rec_perm') msg = `嗨 ${name}，我是Fisher！距離上次燙髮過了一陣子，捲度應該差不多塌下來了，最近要回來重新整理捲度嗎？🌊`;
+        else if (type === 'rec_treat') msg = `嗨 ${name}，我是Fisher！最近頭髮還好整理嗎？要不要抽空回來做個深層護髮，保養一下髮質呢？🌿`;
+        
+        // 節慶行銷專屬
+        else if (type === 'fest_jan') msg = `嗨 ${name}！過年前的預約表大戰準備開打啦🧨 因為你是 Fisher 的專屬 VIP，我特別提早把熱門時段先保留給你！想卡位哪一天呢？趕快跟我說！💪`;
+        else if (type === 'fest_feb') msg = `嗨 ${name}！情人節快到囉🌸 最近 Fisher 進了超美的新髮色，幫你換個微捲造型或是招桃花髮色，去約會絕對超加分！最近有空來變美嗎？✨`;
+        else if (type === 'fest_mar') msg = `嗨 ${name}！最近換季天氣忽冷忽熱，頭皮是不是容易乾癢出油呢？🌱 Fisher 推出了春季頭皮深層理療，有空來找我放鬆一下保養頭皮吧！💆‍♀️`;
+        else if (type === 'fest_apr') msg = `嗨 ${name}！天氣漸熱囉☀️ 你的頭髮應該變厚重了，最近有空來找 Fisher 修剪，或換個輕盈透亮的新髮色嗎？讓整個春夏清爽起來！💇‍♀️`;
+        else if (type === 'fest_may') msg = `嗨 ${name}！母親節快到囉🌷 平常辛苦了，Fisher 推出『母親節專屬/母女同行』優惠！帶媽媽一起來換新髮型，或來個深層護理寵愛自己一下吧！☕️`;
+        else if (type === 'fest_jun') msg = `嗨 ${name}！畢業求職季到囉🎓 來找 Fisher 幫你換個俐落的面試必勝髮型，或是染個超有質感的深色調，讓面試官一眼就記住你！💪`;
+        else if (type === 'fest_jul') msg = `嗨 ${name}！夏天出遊拍照季到囉🏖️ 準備好換個清爽的新造型或是亮眼髮色出去玩了嗎？Fisher 這邊還有夏日頭皮控油跟防曬護理，有空來找我整理一下吧！✨`;
+        else if (type === 'fest_aug_father') msg = `嗨 ${name}！父親節快到囉👔 Fisher 推出了男士專屬俐落剪裁與頭皮紓壓方案！趁過節來好好放鬆，或是請家人幫你預約大改造吧！💪`;
+        else if (type === 'fest_aug_vday') msg = `嗨 ${name}！七夕情人節快到囉💖 準備好去哪裡約會了嗎？來找 Fisher 幫你換個浪漫微捲燙或是招桃花髮色，保證讓另一半眼睛一亮！✨`;
+        else if (type === 'fest_sep') msg = `嗨 ${name}！最近天氣開始轉涼囉🍁 算算時間頭髮應該褪色了，Fisher 最近進了超美的秋季限定色，超級顯白！有空想回來換個秋裝嗎？✨`;
+        else if (type === 'fest_oct') msg = `嗨 ${name}！經歷了夏天的烈日跟玩水，頭髮是不是變得比較毛躁呢？🍂 Fisher 推出了曬後深層急救『高階結構式護髮』，幫你把髮質完美救回來！💆‍♀️`;
+        else if (type === 'fest_nov') msg = `嗨 ${name}！百貨週年慶開跑啦🛍️ Fisher 幫你爭取到了超殺的沙龍級髮品囤貨優惠！大瓶裝折扣比外面便宜超多，需要我幫你預留幾組嗎？賣完就沒囉！🏃‍♀️`;
+        else if (type === 'fest_dec') msg = `嗨 ${name}！聖誕跨年趴踢準備好閃耀了嗎？🎄 Fisher 準備了年末派對大改造與頂級光澤護理，讓你成為全場焦點！年末預約比較滿，趕快先跟我卡位喔！✨`;
+        
         else msg = `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
+        
         navigator.clipboard.writeText(msg).then(() => alert('✅ 專屬話術已複製！請去 LINE 貼上傳送'));
     }
 
@@ -387,6 +408,26 @@
         title.innerText = `🔄 分析【${service.replace('節慶：', '')}】名單中...`; 
         list.innerHTML = '<div class="text-center my-3"><div class="spinner-border spinner-border-sm" style="color: var(--primary-color);"></div></div>';
         
+        // ⭐ 這裡將篩選出來的名單，掛載對應的話術標籤
+        let actTag = '';
+        if (service === '剪髮') actTag = 'rec_cut';
+        else if (service === '染髮') actTag = 'rec_dye';
+        else if (service === '燙髮') actTag = 'rec_perm';
+        else if (service === '護髮') actTag = 'rec_treat';
+        else if (service.includes('1月')) actTag = 'fest_jan';
+        else if (service.includes('2月')) actTag = 'fest_feb';
+        else if (service.includes('3月')) actTag = 'fest_mar';
+        else if (service.includes('4月')) actTag = 'fest_apr';
+        else if (service.includes('母親節')) actTag = 'fest_may';
+        else if (service.includes('6月')) actTag = 'fest_jun';
+        else if (service.includes('7月')) actTag = 'fest_jul';
+        else if (service.includes('父親節')) actTag = 'fest_aug_father';
+        else if (service.includes('七夕')) actTag = 'fest_aug_vday';
+        else if (service.includes('9月')) actTag = 'fest_sep';
+        else if (service.includes('10月')) actTag = 'fest_oct';
+        else if (service.includes('11月')) actTag = 'fest_nov';
+        else if (service.includes('12月')) actTag = 'fest_dec';
+
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getRecommendations', payload: service }) })
         .then(res => res.json()).then(data => {
             title.innerText = `🎯 【${service.replace('節慶：', '')}】推廣名單 (${data.data.length}名)`; 
@@ -398,9 +439,15 @@
                 let ageBadge = item.age ? `<span class="badge bg-secondary opacity-75 ms-1">${item.age}</span>` : '';
                 
                 list.innerHTML += `
-                    <div class="p-2 mb-2 rounded-3 small" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
-                        <div class="fw-bold text-dark">${item.name} ${vipBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
-                        <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
+                    <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-bold text-dark">${item.name} ${vipBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
+                                <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
+                            </div>
+                            <!-- ⭐ 在推薦名單旁邊加入話術複製按鈕 -->
+                            <button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyMsg(this)">📋 話術</button>
+                        </div>
                         ${warningHtml}
                     </div>`;
             });
