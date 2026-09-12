@@ -54,7 +54,11 @@
         .fc-col-header-cell-cushion { color: var(--primary-color) !important; font-weight: 700; font-size: 0.85rem; }
         .fc-daygrid-day-number { color: #8e7d71 !important; font-weight: 500; padding: 6px !important; }
         .fc-day-today { background-color: #fff9f0 !important; }
-        .fc-event { border: none !important; border-radius: 5px !important; padding: 2px 4px !important; font-size: 0.8rem; }
+        
+        /* ⭐ 優化：讓行事曆上的按鈕可以明顯被點擊，並移除邊框 */
+        .fc-event { border: none !important; border-radius: 5px !important; padding: 3px 6px !important; font-size: 0.85rem; cursor: pointer; transition: transform 0.1s; }
+        .fc-event:hover { transform: scale(1.02); filter: brightness(0.95); }
+        
         .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; font-size: 0.85rem !important; padding: 4px 10px !important; }
         .history-photo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border: 1.5px solid #f0e6da; cursor: pointer; transition: transform 0.2s; background-color: #eee; }
         .history-photo:hover { transform: scale(1.05); }
@@ -265,7 +269,6 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label text-muted small">電話</label>
-                    <!-- ⭐防呆：限制只能輸入數字、限制長度10碼 -->
                     <input type="tel" class="form-control" id="formPhone" maxlength="10" oninput="this.value=this.value.replace(/[^\d]/g,'')">
                 </div>
                 <div class="col-md-3">
@@ -416,7 +419,6 @@
     }
 
     function renderDataList(customers) {
-        // ⭐ 這裡加入了防呆：強制補回被吃掉的 0
         globalCustomers = customers.map(c => {
             if (c.phone) {
                 let p = String(c.phone).trim();
@@ -458,11 +460,27 @@
         }
     }
 
+    // ⭐ 升級版行事曆：加入點擊自動搜尋的功能！
     function initCalendar(eventsData) {
         const calendarEl = document.getElementById('calendar');
         if(calendar) { calendar.destroy(); }
         calendar = new FullCalendar.Calendar(calendarEl, { 
-            initialView: 'dayGridMonth', locale: 'zh-tw', events: eventsData, height: 'auto', buttonText: { today: '今天' }
+            initialView: 'dayGridMonth', 
+            locale: 'zh-tw', 
+            events: eventsData, 
+            height: 'auto', 
+            buttonText: { today: '今天' },
+            eventClick: function(info) {
+                const custName = info.event.extendedProps.searchName;
+                if(custName) {
+                    // 自動把名字填入搜尋框，清空標籤過濾器，然後觸發搜尋
+                    document.getElementById('searchInput').value = custName;
+                    document.getElementById('searchTagFilter').value = ""; 
+                    searchCustomer();
+                    // 在手機版上，自動往下捲動到搜尋結果區塊
+                    document.getElementById('historyArea').scrollIntoView({ behavior: 'smooth' });
+                }
+            }
         });
         calendar.render();
     }
@@ -749,7 +767,6 @@
     document.getElementById('recordForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // ⭐ 第一關防呆：驗證手機號碼格式
         const phoneInput = document.getElementById('formPhone').value.trim();
         if (phoneInput !== '') {
             const phoneRegex = /^09\d{8}$/;
@@ -759,7 +776,6 @@
             }
         }
 
-        // ⭐ 第二關防呆：驗證生日格式
         const birthdayInput = document.getElementById('formBirthday').value.trim();
         if (birthdayInput !== '') {
             const bdayRegex = /^(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])$/;
