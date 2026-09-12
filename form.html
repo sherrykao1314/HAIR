@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fisher Customers | VIP 專屬資料登錄</title>
+    <title>Fisher Customers</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
     <style>
@@ -21,7 +21,8 @@
 <div class="container px-4">
     <div class="form-container">
         <div class="text-center mb-4">
-            <h3 class="serif fw-bold" style="color: #C8A97E;">✨ Fisher Salon</h3>
+            <!-- ⭐ 標題已更新為 Fisher Customers -->
+            <h3 class="serif fw-bold" style="color: #C8A97E;">✨ Fisher Customers</h3>
             <p class="text-muted small mt-2">VIP 專屬資料登錄</p>
             <div style="background: #fcf4ea; padding: 15px; border-radius: 12px; font-size: 0.9rem; color: #8e7d71; text-align: left;">
                 為了未來能為您提供更精準的髮型建議，以及發送專屬的生日與節慶福利🎁<br>
@@ -37,7 +38,6 @@
             
             <div class="mb-3">
                 <label class="form-label fw-bold small text-secondary">手機號碼 *</label>
-                <!-- ⭐ 加入 maxlength限制長度，以及 oninput 自動過濾非數字的符號或中文字 -->
                 <input type="tel" class="form-control" id="cPhone" placeholder="09xxxxxxxx" maxlength="10" oninput="this.value=this.value.replace(/[^\d]/g,'')" required>
             </div>
 
@@ -91,7 +91,7 @@
     document.getElementById('customerForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // ⭐ 第一關防呆：驗證手機號碼格式 (必須是 09 開頭的 10 碼數字)
+        // 第一關防呆：驗證手機號碼格式 (必須是 09 開頭的 10 碼數字)
         const phoneInput = document.getElementById('cPhone').value.trim();
         const phoneRegex = /^09\d{8}$/;
         if (!phoneRegex.test(phoneInput)) {
@@ -99,10 +99,9 @@
             return; // 終止送出
         }
 
-        // ⭐ 第二關防呆：驗證生日格式 (如果有填寫的話)
+        // 第二關防呆：驗證生日格式 (如果有填寫的話)
         const birthdayInput = document.getElementById('cBirthday').value.trim();
         if (birthdayInput !== '') {
-            // 正規表達式：檢查月份(01-12或1-12) 與 日期(01-31或1-31)，並允許 / 或 - 分隔
             const bdayRegex = /^(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])$/;
             if (!bdayRegex.test(birthdayInput)) {
                 alert('❌ 生日格式錯誤！請輸入有效的「月/日」，例如 12/17 或 05/03。');
