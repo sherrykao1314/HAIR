@@ -37,7 +37,8 @@
             
             <div class="mb-3">
                 <label class="form-label fw-bold small text-secondary">手機號碼 *</label>
-                <input type="tel" class="form-control" id="cPhone" placeholder="09xxxxxxxx" required>
+                <!-- ⭐ 加入 maxlength限制長度，以及 oninput 自動過濾非數字的符號或中文字 -->
+                <input type="tel" class="form-control" id="cPhone" placeholder="09xxxxxxxx" maxlength="10" oninput="this.value=this.value.replace(/[^\d]/g,'')" required>
             </div>
 
             <div class="row mb-3">
@@ -85,22 +86,41 @@
 </div>
 
 <script>
-    // ⚠️ 請確保這裡的網址，跟你系統裡的 GAS_URL 是一模一樣的！
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKadEE9GfMYxDG6cHDz3qaUHFZx6qzG3A7Q8T2HyImWlAP5vt1K-Wn9hk51YZ369Vmug/exec';
 
     document.getElementById('customerForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // ⭐ 第一關防呆：驗證手機號碼格式 (必須是 09 開頭的 10 碼數字)
+        const phoneInput = document.getElementById('cPhone').value.trim();
+        const phoneRegex = /^09\d{8}$/;
+        if (!phoneRegex.test(phoneInput)) {
+            alert('❌ 手機號碼格式錯誤！請輸入 09 開頭的 10 碼數字。');
+            return; // 終止送出
+        }
+
+        // ⭐ 第二關防呆：驗證生日格式 (如果有填寫的話)
+        const birthdayInput = document.getElementById('cBirthday').value.trim();
+        if (birthdayInput !== '') {
+            // 正規表達式：檢查月份(01-12或1-12) 與 日期(01-31或1-31)，並允許 / 或 - 分隔
+            const bdayRegex = /^(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])$/;
+            if (!bdayRegex.test(birthdayInput)) {
+                alert('❌ 生日格式錯誤！請輸入有效的「月/日」，例如 12/17 或 05/03。');
+                return; // 終止送出
+            }
+        }
+
         const btn = document.getElementById('submitBtn');
         btn.innerText = '資料傳送中...';
         btn.disabled = true;
 
         const payload = {
-            name: document.getElementById('cName').value,
-            phone: document.getElementById('cPhone').value,
-            birthday: document.getElementById('cBirthday').value,
+            name: document.getElementById('cName').value.trim(),
+            phone: phoneInput,
+            birthday: birthdayInput,
             gender: document.getElementById('cGender').value,
             ageRange: document.getElementById('cAge').value,
-            lineId: document.getElementById('cLine').value
+            lineId: document.getElementById('cLine').value.trim()
         };
 
         fetch(GAS_URL, {
@@ -114,13 +134,13 @@
                 document.getElementById('successMsg').style.display = 'block';
             } else {
                 alert('發生錯誤：' + data.message);
-                btn.innerText = '送出資料領取福利';
+                btn.innerText = '送出資料';
                 btn.disabled = false;
             }
         })
         .catch(err => {
             alert('網路錯誤，請稍後再試！');
-            btn.innerText = '送出資料領取福利';
+            btn.innerText = '送出資料';
             btn.disabled = false;
         });
     });
