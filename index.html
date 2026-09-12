@@ -44,7 +44,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d4b996; border-radius: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c8a97e; }
 
-        /* ⭐ 全新設計的超高質感玻璃儀表板 */
         .stats-card { background: linear-gradient(135deg, #C8A97E, #b5956a); color: white; border-radius: 20px; padding: 22px; box-shadow: 0 8px 20px rgba(200,169,126,0.25); }
         .stats-mini-box { background: rgba(255,255,255,0.18); border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
 
@@ -69,7 +68,6 @@
         <span id="todayDate" class="text-muted small"></span>
     </div>
 
-    <!-- ⭐ 絕美半透明玻璃卡片戰情室 -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="stats-card">
@@ -190,6 +188,7 @@
                             <optgroup label="生活型態">
                                 <option value="排班制">排班制</option>
                                 <option value="週休二日">週休二日</option>
+                                <option value="自由工作者">自由工作者</option> <!-- ⭐ 新增: 自由工作者 -->
                                 <option value="學生">學生</option>
                                 <option value="貴婦">貴婦</option>
                                 <option value="無業待業">無業待業</option>
@@ -264,9 +263,18 @@
                     <input type="text" class="form-control" id="formName" list="formCustomerList" onchange="autoFillCustomer()" placeholder="輸入舊客帶入" required>
                     <datalist id="formCustomerList"></datalist>
                 </div>
-                <div class="col-md-3"><label class="form-label text-muted small">電話</label><input type="text" class="form-control" id="formPhone"></div>
-                <div class="col-md-3"><label class="form-label text-muted small">生日 (選填)</label><input type="text" class="form-control" id="formBirthday" placeholder="例: 12/17"></div>
-                <div class="col-md-3"><label class="form-label text-muted small">性別</label><select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select></div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small">電話</label>
+                    <input type="tel" class="form-control" id="formPhone" maxlength="10" oninput="this.value=this.value.replace(/[^\d]/g,'')">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small">生日 (選填)</label>
+                    <input type="text" class="form-control" id="formBirthday" placeholder="例: 12/17">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-muted small">性別</label>
+                    <select class="form-select" id="formGender"><option value="女">女</option><option value="男">男</option></select>
+                </div>
             </div>
             
             <div class="row mb-3">
@@ -283,6 +291,7 @@
                         <option value="">(選填)</option>
                         <option value="排班制">排班制</option>
                         <option value="週休二日">週休二日</option>
+                        <option value="自由工作者">自由工作者</option> <!-- ⭐ 新增: 自由工作者 -->
                         <option value="學生">學生</option>
                         <option value="貴婦">貴婦</option>
                         <option value="無業待業">無業待業</option>
@@ -372,7 +381,6 @@
                 renderDataList(data.data.customers);
                 initCalendar(data.data.events);
                 
-                // ⭐ 渲染全新玻璃卡片儀表板
                 let st = data.data.statsData;
                 let monthArr = st.month.split('-');
                 document.getElementById('topStatsMonthTitle').innerText = `${monthArr[0]}年 ${parseInt(monthArr[1])}月 營業總額`;
@@ -483,14 +491,17 @@
         return `嗨 ${name}，我是Fisher！算算時間，你的頭髮應該變長/布丁頭跑出來囉，最近有空要回來整理一下嗎？💇‍♀️`;
     }
 
-    // ⭐ 一鍵自動複製並喚醒 LINE APP
     function copyAndLine(btn) {
         let msg = getMessageText(btn);
         let lineId = btn.getAttribute('data-line');
         
         navigator.clipboard.writeText(msg).then(() => {
             if (lineId && lineId !== 'undefined' && lineId !== 'null' && lineId !== '') {
-                window.open('https://line.me/R/', '_blank'); 
+                let safeLineId = lineId.trim();
+                let lineUrl = safeLineId.startsWith('@') ? 
+                              'https://line.me/R/ti/p/' + safeLineId : 
+                              'https://line.me/ti/p/~' + safeLineId;
+                window.open(lineUrl, '_blank'); 
             } else {
                 alert('✅ 專屬話術已複製！請去 LINE 貼上傳送');
             }
@@ -503,7 +514,7 @@
             { title: '🤝 轉介紹感恩 (極致擴客)', data: r.referral, tag: '', type: 'customer', cls: 'border-info-soft', act: 'referral' },
             { title: '🆘 新客挽救 (只來1次且逾75天)', data: r.firstRescue, tag: 'f75', type: 'customer', cls: 'border-danger-soft', act: 'firstRescue' },
             { title: '🎂 即將生日 (優惠邀約)', data: r.birthday, tag: '', type: 'customer', cls: 'border-bday', act: 'birthday' },
-            { title: '🚨 潛在流失 (逾半年未回流)', data: r.potentialChurn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'potentialChurn', noMsg: true },
+            { title: '🚨 潛流失 (逾半年未回流)', data: r.potentialChurn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'potentialChurn', noMsg: true },
             { title: '⚠️ 三個月未回流 (90天以上)', data: r.threeMonths, tag: '', type: 'customer', cls: 'border-warning-soft', act: 'threeMonths', noMsg: true },
             { title: '🧴 產品回購 (60天用罄)', data: r.product, tag: 'p60', type: 'record', cls: 'border-warning-soft', act: 'product' },
             { title: '2天後 (術後追蹤)', data: r.day2, tag: 'd2', type: 'record', cls: 'border-d2', act: 'day2' },
@@ -529,7 +540,6 @@
                     let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                     let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                     
-                    // ⭐ 只顯示一顆按鈕，有 LINE 顯示綠色，沒 LINE 顯示白色
                     let actionHtml = '';
                     if (!g.noMsg) {
                         if (item.lineId) {
@@ -729,6 +739,27 @@
 
     document.getElementById('recordForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        // ⭐ 第一關防呆：驗證手機號碼格式
+        const phoneInput = document.getElementById('formPhone').value.trim();
+        if (phoneInput !== '') {
+            const phoneRegex = /^09\d{8}$/;
+            if (!phoneRegex.test(phoneInput)) {
+                alert('❌ 手機號碼格式錯誤！請輸入 09 開頭的 10 碼數字。');
+                return; 
+            }
+        }
+
+        // ⭐ 第二關防呆：驗證生日格式
+        const birthdayInput = document.getElementById('formBirthday').value.trim();
+        if (birthdayInput !== '') {
+            const bdayRegex = /^(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])$/;
+            if (!bdayRegex.test(birthdayInput)) {
+                alert('❌ 生日格式錯誤！請輸入有效的「月/日」，例如 12/17 或 05/03。');
+                return; 
+            }
+        }
+
         const btn = document.getElementById('submitBtn'); btn.innerText = '儲存與照片壓縮中...'; btn.disabled = true;
         const services = [];
         [1,2,3,4].forEach(i => { const cb = document.getElementById('srv'+i); if(cb.checked) services.push(cb.value); });
@@ -737,8 +768,8 @@
         document.querySelectorAll('.hc-cb:checked').forEach(cb => hairConds.push(cb.value));
 
         const payload = {
-            name: document.getElementById('formName').value, phone: document.getElementById('formPhone').value,
-            birthday: document.getElementById('formBirthday').value, gender: document.getElementById('formGender').value, 
+            name: document.getElementById('formName').value, phone: phoneInput,
+            birthday: birthdayInput, gender: document.getElementById('formGender').value, 
             hairLength: document.getElementById('formHair').value, ageRange: document.getElementById('formAge').value,
             lifestyle: document.getElementById('formLifestyle').value, hairCondition: hairConds.join(','),
             date: document.getElementById('formDate').value, referrer: document.getElementById('formReferrer').value,
