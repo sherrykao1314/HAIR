@@ -44,8 +44,8 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d4b996; border-radius: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #c8a97e; }
 
-        .stats-card { background: linear-gradient(135deg, #C8A97E, #b5956a); color: white; border-radius: 20px; padding: 22px; box-shadow: 0 8px 20px rgba(200,169,126,0.25); }
-        .stats-mini-box { background: rgba(255,255,255,0.18); border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
+        .stats-card { background: linear-gradient(135deg, #C8A97E, #b5956a); color: white; border-radius: 16px; padding: 14px 18px; box-shadow: 0 6px 15px rgba(200,169,126,0.25); }
+        .stats-mini-box { background: rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 4px; text-align: center; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
 
         .fc a, .fc a:hover { color: inherit !important; text-decoration: none !important; cursor: pointer; }
         .fc .fc-toolbar-title { font-family: 'Noto Serif TC', serif; font-size: 1.15rem !important; color: var(--text-dark); }
@@ -71,12 +71,12 @@
     <div class="row mb-3">
         <div class="col-12">
             <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
-                        <div class="small opacity-75 fw-bold mb-1" id="topStatsMonthTitle" style="font-size: 0.85rem;">本月營業總額</div>
-                        <h2 class="m-0 fw-bold" style="letter-spacing: 1px;">$<span id="topStatsRev">0</span></h2>
+                        <div class="small opacity-75 fw-bold" id="topStatsMonthTitle" style="font-size: 0.75rem; margin-bottom: 2px;">本月營業總額</div>
+                        <h3 class="m-0 fw-bold" style="letter-spacing: 1px;">$<span id="topStatsRev">0</span></h3>
                     </div>
-                    <button class="btn btn-light btn-sm text-primary rounded-pill shadow-sm px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#statsModal" style="font-size: 0.85rem;">
+                    <button class="btn btn-light btn-sm text-primary rounded-pill shadow-sm px-3 py-1 fw-bold" data-bs-toggle="modal" data-bs-target="#statsModal" style="font-size: 0.8rem;">
                         🔍 歷史查詢
                     </button>
                 </div>
@@ -84,20 +84,20 @@
                 <div class="row g-2">
                     <div class="col-4">
                         <div class="stats-mini-box">
-                            <div class="small opacity-75 mb-1" style="font-size: 0.75rem;">總來客</div>
-                            <div class="fw-bold"><span id="topStatsVisits" class="fs-5">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">次</small></div>
+                            <div class="small opacity-75 mb-0" style="font-size: 0.7rem;">總來客</div>
+                            <div class="fw-bold"><span id="topStatsVisits" style="font-size: 1.1rem;">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">次</small></div>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="stats-mini-box">
-                            <div class="small opacity-75 mb-1" style="font-size: 0.75rem;">舊客回流</div>
-                            <div class="fw-bold"><span id="topStatsOld" class="fs-5">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">人</small></div>
+                            <div class="small opacity-75 mb-0" style="font-size: 0.7rem;">舊客回流</div>
+                            <div class="fw-bold"><span id="topStatsOld" style="font-size: 1.1rem;">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">人</small></div>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="stats-mini-box">
-                            <div class="small opacity-75 mb-1" style="font-size: 0.75rem;">新客數</div>
-                            <div class="fw-bold"><span id="topStatsNew" class="fs-5">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">人</small></div>
+                            <div class="small opacity-75 mb-0" style="font-size: 0.7rem;">新客數</div>
+                            <div class="fw-bold"><span id="topStatsNew" style="font-size: 1.1rem;">0</span><small class="fw-normal ms-1" style="font-size:0.7rem;">人</small></div>
                         </div>
                     </div>
                 </div>
@@ -188,7 +188,7 @@
                             <optgroup label="生活型態">
                                 <option value="排班制">排班制</option>
                                 <option value="週休二日">週休二日</option>
-                                <option value="自由工作者">自由工作者</option> <!-- ⭐ 新增: 自由工作者 -->
+                                <option value="自由工作者">自由工作者</option>
                                 <option value="學生">學生</option>
                                 <option value="貴婦">貴婦</option>
                                 <option value="無業待業">無業待業</option>
@@ -265,6 +265,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label text-muted small">電話</label>
+                    <!-- ⭐防呆：限制只能輸入數字、限制長度10碼 -->
                     <input type="tel" class="form-control" id="formPhone" maxlength="10" oninput="this.value=this.value.replace(/[^\d]/g,'')">
                 </div>
                 <div class="col-md-3">
@@ -291,7 +292,7 @@
                         <option value="">(選填)</option>
                         <option value="排班制">排班制</option>
                         <option value="週休二日">週休二日</option>
-                        <option value="自由工作者">自由工作者</option> <!-- ⭐ 新增: 自由工作者 -->
+                        <option value="自由工作者">自由工作者</option>
                         <option value="學生">學生</option>
                         <option value="貴婦">貴婦</option>
                         <option value="無業待業">無業待業</option>
@@ -415,11 +416,19 @@
     }
 
     function renderDataList(customers) {
-        globalCustomers = customers; 
+        // ⭐ 這裡加入了防呆：強制補回被吃掉的 0
+        globalCustomers = customers.map(c => {
+            if (c.phone) {
+                let p = String(c.phone).trim();
+                if (p.startsWith('9') && p.length === 9) c.phone = '0' + p;
+            }
+            return c;
+        });
+        
         const dl = document.getElementById('customerDataList');
         const formDl = document.getElementById('formCustomerList');
         dl.innerHTML = ''; if(formDl) formDl.innerHTML = '';
-        customers.forEach(c => { 
+        globalCustomers.forEach(c => { 
             let vipMark = c.vip ? ` [${c.vip}]` : '';
             dl.innerHTML += `<option value="${c.name}">${c.phone || ''}${vipMark}</option>`; 
             if(formDl) formDl.innerHTML += `<option value="${c.name}">${c.phone || ''}</option>`;
@@ -514,7 +523,7 @@
             { title: '🤝 轉介紹感恩 (極致擴客)', data: r.referral, tag: '', type: 'customer', cls: 'border-info-soft', act: 'referral' },
             { title: '🆘 新客挽救 (只來1次且逾75天)', data: r.firstRescue, tag: 'f75', type: 'customer', cls: 'border-danger-soft', act: 'firstRescue' },
             { title: '🎂 即將生日 (優惠邀約)', data: r.birthday, tag: '', type: 'customer', cls: 'border-bday', act: 'birthday' },
-            { title: '🚨 潛流失 (逾半年未回流)', data: r.potentialChurn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'potentialChurn', noMsg: true },
+            { title: '🚨 潛在流失 (逾半年未回流)', data: r.potentialChurn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'potentialChurn', noMsg: true },
             { title: '⚠️ 三個月未回流 (90天以上)', data: r.threeMonths, tag: '', type: 'customer', cls: 'border-warning-soft', act: 'threeMonths', noMsg: true },
             { title: '🧴 產品回購 (60天用罄)', data: r.product, tag: 'p60', type: 'record', cls: 'border-warning-soft', act: 'product' },
             { title: '2天後 (術後追蹤)', data: r.day2, tag: 'd2', type: 'record', cls: 'border-d2', act: 'day2' },
