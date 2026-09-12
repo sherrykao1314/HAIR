@@ -391,12 +391,15 @@
                     let finalTag = item.tag ? item.tag : g.tag; 
                     let vipBadge = item.vip ? `<span class="vip-badge">${item.vip}</span>` : '';
                     
-                    // ⭐ 更新：判斷是否為無話術的流失名單，是的話就不顯示話術按鈕
+                    // ⭐ 在這裡加上新客與轉介紹標籤！
+                    let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
+                    let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
+                    
                     let msgBtnHtml = g.noMsg ? '' : `<button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyMsg(this)">📋 話術</button>`;
                     
                     container.innerHTML += `
                     <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
-                        <div><strong class="text-dark">${item.name}</strong> ${vipBadge} ${srvBadge}<br><small style="color: #a39589;">${dateInfo}</small></div>
+                        <div><strong class="text-dark">${item.name}</strong> ${vipBadge} ${newBadge} ${refBadge} ${srvBadge}<br><small style="color: #a39589;">${dateInfo}</small></div>
                         <div class="d-flex flex-column align-items-end gap-1">
                             ${msgBtnHtml}
                             <div class="form-check m-0"><input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${finalTag}', '${g.type}', this)"></div>
@@ -461,12 +464,13 @@
                     <div class="card bg-light border-0 mb-3 shadow-sm p-3" style="border-left: 4px solid var(--primary-color) !important;">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <strong>${item.name}</strong> 
-                                <span class="text-muted fw-normal ms-2 small">${item.date}</span>
+                                <!-- ⭐ 搜尋結果中，將重要身分標籤直接放在名字旁邊 -->
+                                <strong>${item.name}</strong> <span class="ms-1">${item.nameBadgesHtml}</span>
+                                <div class="text-muted fw-normal small mt-1">${item.date}</div>
                             </div>
                             <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
                         </div>
-                        <div class="mt-1 mb-2 lh-lg">${item.badgesHtml}</div>
+                        <div class="mt-2 mb-2 lh-lg">${item.detailBadgesHtml}</div>
                         <div class="mt-2 text-primary fw-bold" style="color: var(--primary-color) !important;">${item.services}</div>
                         ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded border border-light">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
                         ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">💬 ${item.memo}</div>` : ''}
@@ -514,11 +518,15 @@
                 let warningHtml = item.warning ? `<div class="warning-text">${item.warning}</div>` : '';
                 let ageBadge = item.age ? `<span class="badge bg-secondary opacity-75 ms-1">${item.age}</span>` : '';
                 
+                // ⭐ 在這裡加上新客與轉介紹標籤！
+                let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
+                let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
+                
                 list.innerHTML += `
                     <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <div class="fw-bold text-dark">${item.name} ${vipBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
+                                <div class="fw-bold text-dark">${item.name} ${vipBadge} ${newBadge} ${refBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
                                 <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
                             </div>
                             <button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyMsg(this)">📋 話術</button>
