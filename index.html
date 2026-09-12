@@ -48,7 +48,7 @@
         .fc-day-today { background-color: #fff9f0 !important; }
         .fc-event { border: none !important; border-radius: 5px !important; padding: 2px 4px !important; font-size: 0.8rem; }
         .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; font-size: 0.85rem !important; padding: 4px 10px !important; }
-        .history-photo { width: 90px; height: 90px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border: 1.5px solid #f0e6da; cursor: pointer; transition: transform 0.2s; background-color: #eee; }
+        .history-photo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border: 1.5px solid #f0e6da; cursor: pointer; transition: transform 0.2s; background-color: #eee; }
         .history-photo:hover { transform: scale(1.05); }
     </style>
 </head>
@@ -114,8 +114,8 @@
                             <optgroup label="客戶分級">
                                 <option value="VVIP">👑 VVIP (>3萬)</option>
                                 <option value="VIP">💎 VIP (>1萬)</option>
-                                <option value="老客戶">🌟 老客戶 (4次+)</option>
-                                <option value="新客戶">🌱 新客戶 (2次內)</option>
+                                <option value="老客戶">🌟 老客 (4次+)</option>
+                                <option value="新客戶">🌱 新客 (2次內)</option>
                                 <option value="潛在流失">🚨 潛在流失</option>
                             </optgroup>
                             <optgroup label="消費行為">
@@ -232,7 +232,7 @@
             </div>
 
             <div class="row mb-3">
-                <div class="col-md-6"><label class="form-label text-muted small">介紹人 (選填)</label><input type="text" class="form-control" id="formReferrer" placeholder="推薦人姓名"></div>
+                <div class="col-md-6"><label class="form-label text-muted small">介紹人 (選填，舊客自動帶入)</label><input type="text" class="form-control" id="formReferrer" placeholder="推薦人姓名"></div>
                 <div class="col-md-6"><label class="form-label text-muted small">📸 上傳作品照 (可多選，秒傳壓縮)</label><input class="form-control" type="file" id="formPhoto" accept="image/*" multiple></div>
             </div>
 
@@ -271,6 +271,7 @@
         document.getElementById('recordForm').reset();
         document.getElementById('formDate').valueAsDate = new Date(); 
         document.querySelectorAll('.hc-cb').forEach(cb => cb.checked = false); 
+        document.getElementById('formReferrer').value = '';
     });
 
     function loadDashboard() {
@@ -307,6 +308,8 @@
             if (cust.hair) document.getElementById('formHair').value = cust.hair;
             if (cust.age) document.getElementById('formAge').value = cust.age;
             if (cust.lifestyle) document.getElementById('formLifestyle').value = cust.lifestyle;
+            // ⭐ 新增：自動帶入介紹人
+            if (cust.referrer) document.getElementById('formReferrer').value = cust.referrer;
             
             document.querySelectorAll('.hc-cb').forEach(cb => cb.checked = false);
             if (cust.hairCondition) {
@@ -376,7 +379,7 @@
             { title: '1週後 (染髮回報)', data: r.day7, tag: 'd7', type: 'record', cls: 'border-d7', act: 'day7' },
             { title: '23天後 (男客回流)', data: r.day23, tag: 'd23', type: 'record', cls: 'border-d23', act: 'cycle' },
             { title: '30天後 (短髮/護髮)', data: r.day30, tag: 'd30', type: 'record', cls: '', act: 'cycle' },
-            { title: '40天後 (長髮回流)', data: r.day40, tag: 'd40', type: 'record', cls: '', act: 'cycle' }
+            { title: '40天後 (長髮 / 染燙回流)', data: r.day40, tag: 'd40', type: 'record', cls: '', act: 'cycle' }
         ];
 
         let hasData = false;
@@ -391,15 +394,15 @@
                     let finalTag = item.tag ? item.tag : g.tag; 
                     let vipBadge = item.vip ? `<span class="vip-badge">${item.vip}</span>` : '';
                     
-                    // ⭐ 在這裡加上新客與轉介紹標籤！
                     let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
+                    let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                     let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                     
                     let msgBtnHtml = g.noMsg ? '' : `<button class="btn btn-sm px-2 py-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" onclick="copyMsg(this)">📋 話術</button>`;
                     
                     container.innerHTML += `
                     <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
-                        <div><strong class="text-dark">${item.name}</strong> ${vipBadge} ${newBadge} ${refBadge} ${srvBadge}<br><small style="color: #a39589;">${dateInfo}</small></div>
+                        <div><strong class="text-dark">${item.name}</strong> ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${srvBadge}<br><small style="color: #a39589;">${dateInfo}</small></div>
                         <div class="d-flex flex-column align-items-end gap-1">
                             ${msgBtnHtml}
                             <div class="form-check m-0"><input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${finalTag}', '${g.type}', this)"></div>
@@ -432,6 +435,7 @@
         return '';
     }
 
+    // ⭐ 更新：客戶歷程折疊化，以人為單位顯示，避免洗版
     function searchCustomer() {
         const keyword = document.getElementById('searchInput').value;
         const filterTag = document.getElementById('searchTagFilter').value;
@@ -446,35 +450,47 @@
         .then(res => res.json()).then(data => {
             resDiv.innerHTML = '';
             if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到符合條件的顧客紀錄</p>'; return; }
-            data.data.forEach(item => {
-                let photoUrls = item.photo ? item.photo.split(',').map(u => u.trim()).filter(u => u) : [];
-                let photoHtml = '';
-                if (photoUrls.length > 0) {
-                    photoHtml = '<div class="d-flex flex-wrap gap-2 mt-3">';
-                    photoUrls.forEach(url => {
-                        let fileId = parseDriveFileId(url);
-                        let cdnUrl = fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
-                        let rawUrl = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800` : url;
-                        let originalUrl = fileId ? `https://drive.google.com/uc?id=${fileId}` : url;
-                        photoHtml += `<img src="${cdnUrl}" referrerpolicy="no-referrer" class="history-photo" onclick="window.open('${originalUrl}')" title="點擊開啟原圖" onerror="if(this.src!=='${rawUrl}') this.src='${rawUrl}';">`;
-                    });
-                    photoHtml += '</div>';
-                }
+            data.data.forEach(cust => {
+                let recordsHtml = '';
+                cust.records.forEach(item => {
+                    let photoUrls = item.photo ? item.photo.split(',').map(u => u.trim()).filter(u => u) : [];
+                    let photoHtml = '';
+                    if (photoUrls.length > 0) {
+                        photoHtml = '<div class="d-flex flex-wrap gap-2 mt-2">';
+                        photoUrls.forEach(url => {
+                            let fileId = parseDriveFileId(url);
+                            let cdnUrl = fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
+                            let rawUrl = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800` : url;
+                            let originalUrl = fileId ? `https://drive.google.com/uc?id=${fileId}` : url;
+                            photoHtml += `<img src="${cdnUrl}" referrerpolicy="no-referrer" class="history-photo" style="width:75px; height:75px;" onclick="window.open('${originalUrl}')" title="點擊開啟原圖" onerror="if(this.src!=='${rawUrl}') this.src='${rawUrl}';">`;
+                        });
+                        photoHtml += '</div>';
+                    }
+                    recordsHtml += `
+                        <div class="mb-3 ps-3 border-start border-3" style="border-color: #e0e0e0 !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-muted small fw-bold">${item.date}</span>
+                                <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
+                            </div>
+                            <div class="text-primary fw-bold" style="color: var(--primary-color) !important;">${item.services}</div>
+                            ${item.formula ? `<div class="text-muted small mt-1 bg-white p-2 rounded border border-light">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
+                            ${item.memo ? `<div class="mt-1 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">💬 ${item.memo}</div>` : ''}
+                            ${photoHtml}
+                        </div>`;
+                });
+
                 resDiv.innerHTML += `
-                    <div class="card bg-light border-0 mb-3 shadow-sm p-3" style="border-left: 4px solid var(--primary-color) !important;">
+                    <div class="card bg-light border-0 mb-3 shadow-sm p-3" style="border-top: 4px solid var(--primary-color) !important;">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <!-- ⭐ 搜尋結果中，將重要身分標籤直接放在名字旁邊 -->
-                                <strong>${item.name}</strong> <span class="ms-1">${item.nameBadgesHtml}</span>
-                                <div class="text-muted fw-normal small mt-1">${item.date}</div>
+                                <strong class="fs-5">${cust.name}</strong> <span class="ms-1">${cust.nameBadgesHtml}</span>
                             </div>
-                            <span class="badge bg-secondary rounded-pill">$${item.amount}</span>
                         </div>
-                        <div class="mt-2 mb-2 lh-lg">${item.detailBadgesHtml}</div>
-                        <div class="mt-2 text-primary fw-bold" style="color: var(--primary-color) !important;">${item.services}</div>
-                        ${item.formula ? `<div class="text-muted small mt-2 bg-white p-2 rounded border border-light">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
-                        ${item.memo ? `<div class="mt-2 small px-3 py-2 rounded-3" style="background: #fff5f2; color: #a56a56;">💬 ${item.memo}</div>` : ''}
-                        ${photoHtml}
+                        <div class="mt-2 mb-2 lh-lg">${cust.detailBadgesHtml}</div>
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="text-muted small mb-3 fw-bold">📜 消費歷程</div>
+                            ${recordsHtml ? recordsHtml : '<div class="text-muted small">尚無消費紀錄</div>'}
+                        </div>
                     </div>`;
             });
         });
@@ -518,15 +534,15 @@
                 let warningHtml = item.warning ? `<div class="warning-text">${item.warning}</div>` : '';
                 let ageBadge = item.age ? `<span class="badge bg-secondary opacity-75 ms-1">${item.age}</span>` : '';
                 
-                // ⭐ 在這裡加上新客與轉介紹標籤！
                 let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
+                let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
                 let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
                 
                 list.innerHTML += `
                     <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <div class="fw-bold text-dark">${item.name} ${vipBadge} ${newBadge} ${refBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
+                                <div class="fw-bold text-dark">${item.name} ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span></div>
                                 <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
                             </div>
                             <button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyMsg(this)">📋 話術</button>
