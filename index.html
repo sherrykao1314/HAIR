@@ -54,11 +54,10 @@
         .fc-col-header-cell-cushion { color: var(--primary-color) !important; font-weight: 700; font-size: 0.85rem; }
         .fc-daygrid-day-number { color: #8e7d71 !important; font-weight: 500; padding: 6px !important; }
         .fc-day-today { background-color: #fff9f0 !important; }
-        
         .fc-event { border: none !important; border-radius: 5px !important; padding: 3px 6px !important; font-size: 0.85rem; cursor: pointer; transition: transform 0.1s; }
         .fc-event:hover { transform: scale(1.02); filter: brightness(0.95); }
-        
         .fc-button-primary { background-color: var(--primary-color) !important; border-color: var(--primary-color) !important; border-radius: 8px !important; font-size: 0.85rem !important; padding: 4px 10px !important; }
+        
         .history-photo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border: 1.5px solid #f0e6da; cursor: pointer; transition: transform 0.2s; background-color: #eee; }
         .history-photo:hover { transform: scale(1.05); }
     </style>
@@ -109,7 +108,7 @@
     </div>
 
     <div class="row">
-        <!-- 待聯繫名單 (手機版 order-1 在上) -->
+        <!-- 待聯繫名單 -->
         <div class="col-lg-4 order-1 order-lg-2 mb-4 mb-lg-0">
             <div class="card h-100 shadow-sm" style="background: #ffffff;">
                 <div class="card-header text-dark border-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
@@ -124,7 +123,7 @@
             </div>
         </div>
 
-        <!-- 左側主要區塊 (手機版 order-2 在下) -->
+        <!-- 左側主要區塊 -->
         <div class="col-lg-8 order-2 order-lg-1">
             <div class="compact-recommend-bar">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
@@ -216,11 +215,42 @@
                         </select>
                         <input type="text" id="searchInput" class="form-control border-0 bg-light" list="customerDataList" placeholder="🔍 姓名/電話">
                         <datalist id="customerDataList"></datalist>
-                        <button class="btn btn-light border-0 px-3" onclick="searchCustomer()">搜尋</button>
-                        <button class="btn btn-custom px-3" onclick="showCalendar()">行事曆</button>
+                        <button class="btn btn-light border-0 px-2" onclick="searchCustomer()">搜尋</button>
+                        <button class="btn btn-custom px-3" onclick="showCalendar()" title="行事曆">📅</button>
+                        <!-- ⭐ 新增: 全部客戶按鈕 -->
+                        <button class="btn btn-secondary px-3" style="background:#8e7d71; border:none;" onclick="showAllCustomers()" title="全部客戶列表">👥</button>
                     </div>
                     <div id="calendarArea"><div id="calendar"></div></div>
                     <div id="historyArea" style="display: none;"><div id="historyResult"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⭐ 新增：全部客戶列表 Modal -->
+<div class="modal fade" id="allCustomersModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="modal-title fw-bold text-dark">👥 全部客戶列表 (共 <span id="allCustCount">0</span> 人)</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive custom-scrollbar">
+                    <table class="table table-hover align-middle small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>建檔日</th>
+                                <th>姓名</th>
+                                <th>電話</th>
+                                <th>標籤</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allCustomersTableBody">
+                            <!-- JS將自動填入內容 -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -436,6 +466,45 @@
         });
     }
 
+    // ⭐ 全客戶列表功能
+    function showAllCustomers() {
+        let tbody = document.getElementById('allCustomersTableBody');
+        tbody.innerHTML = '';
+        
+        let sorted = [...globalCustomers].sort((a, b) => {
+            if(a.createDate === '未知') return 1;
+            if(b.createDate === '未知') return -1;
+            return new Date(b.createDate) - new Date(a.createDate);
+        });
+
+        document.getElementById('allCustCount').innerText = sorted.length;
+
+        sorted.forEach(c => {
+            let badges = '';
+            if(c.vip) badges += `<span class="badge bg-warning text-dark me-1">${c.vip}</span>`;
+            if(c.lineId) badges += `<span class="badge bg-success me-1">LINE</span>`;
+            
+            // 點擊觸發自動搜尋
+            tbody.innerHTML += `
+                <tr style="cursor:pointer;" onclick="searchSpecificCustomer('${c.name}')" data-bs-dismiss="modal">
+                    <td class="text-muted">${c.createDate}</td>
+                    <td class="fw-bold text-primary">${c.name}</td>
+                    <td>${c.phone}</td>
+                    <td>${badges}</td>
+                </tr>
+            `;
+        });
+        
+        new bootstrap.Modal(document.getElementById('allCustomersModal')).show();
+    }
+
+    function searchSpecificCustomer(name) {
+        document.getElementById('searchInput').value = name;
+        document.getElementById('searchTagFilter').value = '';
+        searchCustomer();
+        document.getElementById('historyArea').scrollIntoView({ behavior: 'smooth' });
+    }
+
     function autoFillCustomer() {
         const nameInput = document.getElementById('formName').value;
         const cust = globalCustomers.find(c => c.name === nameInput);
@@ -471,10 +540,7 @@
             eventClick: function(info) {
                 const custName = info.event.extendedProps.searchName;
                 if(custName) {
-                    document.getElementById('searchInput').value = custName;
-                    document.getElementById('searchTagFilter').value = ""; 
-                    searchCustomer();
-                    document.getElementById('historyArea').scrollIntoView({ behavior: 'smooth' });
+                    searchSpecificCustomer(custName);
                 }
             }
         });
@@ -624,7 +690,6 @@
             data.data.forEach(cust => {
                 let recordsHtml = '';
                 
-                // ⭐ 為了讓搜尋結果包含按鈕，我們在這裡加入 LINE 的按鈕判定
                 let actionHtml = '';
                 if (cust.lineId) {
                     actionHtml = `<button class="btn btn-sm px-3 py-1 shadow-sm fw-bold mt-2" style="background:#06C755; color:white; font-size:0.8rem; border-radius:8px; border:none;" data-type="default" data-name="${cust.name}" data-line="${cust.lineId}" onclick="copyAndLine(this)">💬 LINE 聯絡</button>`;
