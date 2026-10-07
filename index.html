@@ -111,7 +111,10 @@
     </div>
 
     <div class="row">
+        <!-- 待聯繫名單 (手機版 order-1 在上) -->
         <div class="col-lg-4 order-1 order-lg-2 mb-4">
+            
+            <!-- ⭐ 新客雷達區塊 (已補回) -->
             <div id="newRegArea" class="mb-3" style="display:none;">
                 <div class="card shadow-sm border-0" style="background:#e8f4f8; border-left: 4px solid #457B9D !important;">
                    <div class="card-body p-3">
@@ -514,6 +517,9 @@
     });
 
     function loadDashboard() {
+        // ⭐ 加上載入中的顯示，並呼叫 API
+        document.getElementById('reminderList').innerHTML = '<div class="text-center text-muted spinner-border spinner-border-sm" role="status"></div> 讀取中...';
+        
         fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getDashboard' }) })
         .then(res => res.json())
         .then(data => {
@@ -521,6 +527,8 @@
                 renderReminders(data.data.reminders);
                 renderDataList(data.data.customers);
                 initCalendar(data.data.events);
+                
+                // ⭐ 呼叫正確的 renderNewRegistrations 方法
                 renderNewRegistrations(data.data.newRegs);
                 
                 let st = data.data.statsData;
@@ -544,7 +552,7 @@
                 let lineBtn = c.lineId ? `<button class="btn btn-sm px-2 py-1 ms-2" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px; border:none;" onclick="window.open('https://line.me/R/ti/p/~${c.lineId}', '_blank')">💬 LINE</button>` : '';
                 list.innerHTML += `<div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-light">
                     <div style="cursor:pointer;" onclick="searchSpecificCustomer('${c.name}')">
-                        <strong class="text-primary text-decoration-underline">${c.name}</strong> <span class="small text-muted ms-1">${c.phone}</span>
+                        <strong class="text-primary text-decoration-underline searchable-name">${c.name}</strong> <span class="small text-muted ms-1">${c.phone}</span>
                     </div>
                     ${lineBtn}
                 </div>`;
@@ -615,7 +623,7 @@
             tbody.innerHTML += `
                 <tr style="cursor:pointer;" onclick="searchSpecificCustomer('${c.name}')" data-bs-dismiss="modal">
                     <td class="text-muted">${c.createDate}</td>
-                    <td class="fw-bold text-primary">${c.name}</td>
+                    <td class="fw-bold text-primary searchable-name text-decoration-underline">${c.name}</td>
                     <td>${c.phone}</td>
                     <td>${badges}</td>
                 </tr>
@@ -840,6 +848,7 @@
     function renderReminders(r) {
         const container = document.getElementById('reminderList'); container.innerHTML = '';
         const groups = [
+            // ⭐ 重新加入本月許願池組別
             { title: '🎯 本月許願池 (備註曾提到)', data: r.monthIntent, tag: '', type: 'customer', cls: 'border-intent', act: 'monthIntent' },
             { title: '🤝 轉介紹感恩 (極致擴客)', data: r.referral, tag: '', type: 'customer', cls: 'border-info-soft', act: 'referral' },
             { title: '🆘 新客挽救 (只來1次且逾75天)', data: r.firstRescue, tag: 'f75', type: 'customer', cls: 'border-danger-soft', act: 'firstRescue' },
@@ -881,7 +890,7 @@
                         }
                     }
                     
-                    // ⭐ 將待聯繫名單的名字設為超連結，點擊即自動搜尋
+                    // ⭐ 將待聯繫名單裡面的名字全部套用藍字超連結與搜尋點擊！
                     container.innerHTML += `
                     <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
                         <div>
@@ -1008,7 +1017,6 @@
         });
     }
 
-    // ⭐ 前端加入錯誤捕捉機制，如果查詢失敗不再無限轉圈
     function getRecommend(service) {
         if (!service) return;
         const area = document.getElementById('recommendResultArea');
@@ -1063,7 +1071,6 @@
                     actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyAndLine(this)">📋 話術</button>`;
                 }
 
-                // 將名字設為超連結，點擊即搜尋
                 list.innerHTML += `
                     <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
                         <div class="d-flex justify-content-between align-items-start">
