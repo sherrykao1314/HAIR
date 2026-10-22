@@ -482,7 +482,6 @@
             </div>
             <div class="mb-3"><label class="form-label text-muted small">染燙配方</label><input type="text" class="form-control" id="formFormula"></div>
             
-            <!-- ⭐ 新增：折價券下拉選單區塊 -->
             <div class="row mb-3">
                 <div class="col-md-4"><label class="form-label text-muted small">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
                 <div class="col-md-4">
@@ -520,7 +519,7 @@
         document.querySelectorAll('.hc-cb').forEach(cb => cb.checked = false); 
         document.getElementById('formReferrer').value = '';
         document.getElementById('formLineId').value = '';
-        document.getElementById('formUsedCoupon').innerHTML = '<option value="">無 / 不使用</option>'; // ⭐ 重置選單
+        document.getElementById('formUsedCoupon').innerHTML = '<option value="">無 / 不使用</option>';
     });
 
     function loadDashboard() {
@@ -773,7 +772,6 @@
                 });
             }
 
-            // ⭐ 將客人的未用折價券寫入下拉選單
             const couponSelect = document.getElementById('formUsedCoupon');
             couponSelect.innerHTML = '<option value="">無 / 不使用</option>';
             if (cust.availableCoupons) {
@@ -815,7 +813,6 @@
 
         if (type === 'birthday') return `${name} 生日快樂！🎂 這個月是你的生日月，Fisher有幫你準備專屬的生日優惠，想不想換個新造型犒賞自己呀？`;
         
-        // ⭐ 更新後的轉介紹感恩話術
         if (type === 'referral') return `嗨 ${name}！你的朋友 ${ref} 有來找我弄頭髮囉! 非常感謝你的介紹!!!\n這裡提供你推薦人的800元折價金，下次來店消費時出示此訊息就可以使用唷! (洗剪最多折500、燙染可直接折800)\n要直接預約下次日期，也可以直接回覆我~~`;
         
         if (type === 'firstRescue') return `嗨 ${name}！距離上次幫你服務過了一陣子，最近頭髮還習慣嗎？Fisher 針對新朋友有提供專屬的回娘家優惠，最近有空想回來整理頭髮嗎？✨`;
@@ -1170,7 +1167,7 @@
             lineId: document.getElementById('formLineId').value,
             services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
             products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
-            usedCoupon: document.getElementById('formUsedCoupon').value, // ⭐ 紀錄使用的折價券
+            usedCoupon: document.getElementById('formUsedCoupon').value,
             photos: []
         };
 
