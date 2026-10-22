@@ -481,10 +481,19 @@
                 <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" value="護髮" id="srv4"><label class="form-check-label" for="srv4">護髮</label></div>
             </div>
             <div class="mb-3"><label class="form-label text-muted small">染燙配方</label><input type="text" class="form-control" id="formFormula"></div>
+            
+            <!-- ⭐ 新增：折價券下拉選單區塊 -->
             <div class="row mb-3">
-                <div class="col-md-6"><label class="form-label text-muted small">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
-                <div class="col-md-6"><label class="form-label text-muted small">購買產品 (60天自動提醒)</label><input type="text" class="form-control" id="formProducts"></div>
+                <div class="col-md-4"><label class="form-label text-muted small">消費金額</label><input type="number" class="form-control" id="formAmount"></div>
+                <div class="col-md-4">
+                    <label class="form-label text-muted small" style="color:#C8A97E !important; font-weight:bold;">🎫 推薦折價券核銷</label>
+                    <select class="form-select" id="formUsedCoupon">
+                        <option value="">無 / 不使用</option>
+                    </select>
+                </div>
+                <div class="col-md-4"><label class="form-label text-muted small">購買產品 (自動提醒)</label><input type="text" class="form-control" id="formProducts"></div>
             </div>
+            
             <div class="mb-3"><label class="form-label text-muted small">備註 (聊天內容)</label><textarea class="form-control" id="formMemo" rows="2" placeholder="包含 想/要/考慮 染/燙 等字眼，AI會自動捕捉"></textarea></div>
             
             <button type="submit" class="btn btn-custom w-100 py-2 mt-2" id="submitBtn">儲存紀錄</button>
@@ -511,6 +520,7 @@
         document.querySelectorAll('.hc-cb').forEach(cb => cb.checked = false); 
         document.getElementById('formReferrer').value = '';
         document.getElementById('formLineId').value = '';
+        document.getElementById('formUsedCoupon').innerHTML = '<option value="">無 / 不使用</option>'; // ⭐ 重置選單
     });
 
     function loadDashboard() {
@@ -762,6 +772,16 @@
                     if (hcs.includes(cb.value)) cb.checked = true;
                 });
             }
+
+            // ⭐ 將客人的未用折價券寫入下拉選單
+            const couponSelect = document.getElementById('formUsedCoupon');
+            couponSelect.innerHTML = '<option value="">無 / 不使用</option>';
+            if (cust.availableCoupons) {
+                let coupons = cust.availableCoupons.split(',').filter(x=>x);
+                coupons.forEach(c => {
+                    couponSelect.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+            }
         }
     }
 
@@ -784,7 +804,6 @@
         calendar.render();
     }
 
-    // ⭐ 修改話術內容：更新推薦人感恩話術
     function getMessageText(btn) {
         const type = btn.getAttribute('data-type'), name = btn.getAttribute('data-name');
         const prod = btn.getAttribute('data-products'), ref = btn.getAttribute('data-referee');
@@ -830,4 +849,350 @@
         let msg = getMessageText(btn);
         let lineId = btn.getAttribute('data-line');
         
-        navigator.clipboard
+        navigator.clipboard.writeText(msg).then(() => {
+            if (lineId && lineId !== 'undefined' && lineId !== 'null' && lineId !== '') {
+                let safeLineId = lineId.trim();
+                let lineUrl = safeLineId.startsWith('@') ? 
+                              'https://line.me/R/ti/p/' + safeLineId : 
+                              'https://line.me/ti/p/~' + safeLineId;
+                window.open(lineUrl, '_blank'); 
+            } else {
+                alert('✅ 專屬話術已複製！請去 LINE 貼上傳送');
+            }
+        });
+    }
+
+    function renderReminders(r) {
+        const container = document.getElementById('reminderList'); container.innerHTML = '';
+        const groups = [
+            { title: '🎯 本月許願池 (備註曾提到)', data: r.monthIntent, tag: '', type: 'customer', cls: 'border-intent', act: 'monthIntent' },
+            { title: '🤝 轉介紹感恩 (極致擴客)', data: r.referral, tag: '', type: 'customer', cls: 'border-info-soft', act: 'referral' },
+            { title: '🆘 新客挽救 (只來1次且逾75天)', data: r.firstRescue, tag: 'f75', type: 'customer', cls: 'border-danger-soft', act: 'firstRescue' },
+            { title: '🎂 即將生日 (優惠邀約)', data: r.birthday, tag: '', type: 'customer', cls: 'border-bday', act: 'birthday' },
+            { title: '🚨 潛在流失 (逾半年未回流)', data: r.potentialChurn, tag: '', type: 'customer', cls: 'border-danger-soft', act: 'potentialChurn', noMsg: true },
+            { title: '⚠️ 三個月未回流 (90天以上)', data: r.threeMonths, tag: '', type: 'customer', cls: 'border-warning-soft', act: 'threeMonths', noMsg: true },
+            { title: '🧴 產品回購 (60天用罄)', data: r.product, tag: 'p60', type: 'record', cls: 'border-warning-soft', act: 'product' },
+            { title: '2天後 (術後追蹤)', data: r.day2, tag: 'd2', type: 'record', cls: 'border-d2', act: 'day2' },
+            { title: '1週後 (染髮回報)', data: r.day7, tag: 'd7', type: 'record', cls: 'border-d7', act: 'day7' },
+            { title: '23天後 (男客回流)', data: r.day23, tag: 'd23', type: 'record', cls: 'border-d23', act: 'cycle' },
+            { title: '30天後 (短髮/護髮)', data: r.day30, tag: 'd30', type: 'record', cls: '', act: 'cycle' },
+            { title: '40天後 (長髮 / 染燙回流)', data: r.day40, tag: 'd40', type: 'record', cls: '', act: 'cycle' }
+        ];
+
+        let hasData = false;
+        groups.forEach(g => {
+            if (g.data && g.data.length > 0) {
+                hasData = true;
+                container.innerHTML += `<div class="fw-bold mt-3 mb-1" style="color: #8e7d71; font-size:0.9rem;">${g.title}</div>`;
+                g.data.forEach(item => {
+                    let dateInfo = g.act === 'birthday' ? `生日: ${item.date}` : `已過 ${Math.floor((new Date() - new Date(item.date)) / 86400000)} 天`;
+                    if (g.act === 'referral') dateInfo = `被介紹人: ${item.referee}`;
+                    if (g.act === 'monthIntent') dateInfo = `💭 原備註：「${item.originalMemo}」`; 
+
+                    let srvBadge = g.act === 'product' ? `<span class="badge bg-warning text-dark px-2 py-1 ms-1">${item.products}</span>` : (item.services ? `<span class="badge badge-soft px-2 py-1 ms-1">${item.services}</span>` : '');
+                    let finalTag = item.tag ? item.tag : g.tag; 
+                    let vipBadge = item.vip ? `<span class="vip-badge">${item.vip}</span>` : '';
+                    
+                    let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
+                    let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
+                    let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
+                    
+                    let actionHtml = '';
+                    if (!g.noMsg) {
+                        if (item.lineId) {
+                            actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1 shadow-sm fw-bold" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px; border:none;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" data-line="${item.lineId}" data-intent="${item.intentAction || ''}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
+                        } else {
+                            actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-1" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${g.act}" data-name="${item.name}" data-products="${item.products || ''}" data-referee="${item.referee || ''}" data-intent="${item.intentAction || ''}" onclick="copyAndLine(this)">📋 話術</button>`;
+                        }
+                    }
+                    
+                    container.innerHTML += `
+                    <div class="reminder-item ${g.cls} d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong class="text-primary text-decoration-underline searchable-name" style="cursor:pointer;" onclick="searchSpecificCustomer('${item.name}')">${item.name}</strong> 
+                            ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${srvBadge}<br>
+                            <small style="color: #a39589;">${dateInfo}</small>
+                        </div>
+                        <div class="d-flex flex-column align-items-end gap-1">
+                            ${actionHtml}
+                            <div class="form-check m-0 mt-1"><input class="form-check-input shadow-sm" type="checkbox" onchange="markDone(${item.row}, '${finalTag}', '${g.type}', this)"></div>
+                        </div>
+                    </div>`;
+                });
+            }
+        });
+        if (!hasData) container.innerHTML = '<div class="text-muted text-center py-4 small">目前沒有待聯繫名單 ☕</div>';
+    }
+
+    function markDone(rowId, tag, type, checkboxElement) {
+        checkboxElement.disabled = true; 
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'markContacted', payload: { row: rowId, tag: tag, type: type } }) })
+        .then(res => res.json()).then(data => { if(data.status === 'success') loadDashboard(); });
+    }
+
+    function showCalendar() {
+        document.getElementById('historyArea').style.display = 'none';
+        document.getElementById('calendarArea').style.display = 'block';
+        if(calendar) calendar.render();
+    }
+
+    function parseDriveFileId(url) {
+        if (!url) return '';
+        let match = url.match(/id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) return match[1];
+        let slashMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (slashMatch && slashMatch[1]) return slashMatch[1];
+        return '';
+    }
+
+    function searchCustomer() {
+        const keyword = document.getElementById('searchInput').value;
+        const filterTag = document.getElementById('searchTagFilter').value;
+        if(!keyword && !filterTag) return;
+        
+        document.getElementById('calendarArea').style.display = 'none';
+        const resDiv = document.getElementById('historyResult');
+        document.getElementById('historyArea').style.display = 'block';
+        resDiv.innerHTML = '<div class="text-center mt-4 spinner-border text-secondary"></div>';
+        
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'searchCustomers', payload: { keyword: keyword, tag: filterTag } }) })
+        .then(res => res.json()).then(data => {
+            resDiv.innerHTML = '';
+            if (data.data.length === 0) { resDiv.innerHTML = '<p class="text-danger mt-3 text-center">找不到符合條件的顧客紀錄</p>'; return; }
+            
+            window.recordMap = {}; 
+            
+            data.data.forEach(cust => {
+                let recordsHtml = '';
+                let actionHtml = '';
+                if (cust.lineId) {
+                    actionHtml = `<button class="btn btn-sm px-3 py-1 shadow-sm fw-bold mt-2" style="background:#06C755; color:white; font-size:0.8rem; border-radius:8px; border:none;" data-type="default" data-name="${cust.name}" data-line="${cust.lineId}" onclick="copyAndLine(this)">💬 LINE 聯絡</button>`;
+                } else {
+                    actionHtml = `<button class="btn btn-sm px-3 py-1 shadow-sm mt-2" style="background:#f4eee8; color:#8e7d71; font-size:0.8rem; border-radius:8px; border:none;" data-type="default" data-name="${cust.name}" onclick="copyAndLine(this)">📋 複製話術</button>`;
+                }
+                let editHtml = `<button class="btn btn-sm px-3 py-1 shadow-sm mt-2 ms-2" style="background:#fff; border:1px solid #C8A97E; color:#C8A97E; font-size:0.8rem; border-radius:8px;" onclick="openEditModal('${cust.uid}')">✏️ 編輯客戶資料</button>`;
+
+                cust.records.forEach(item => {
+                    window.recordMap[item.recordRow] = {
+                        date: item.date, services: item.services, formula: item.formula, 
+                        amount: item.amount, products: item.products, memo: item.memo, custName: cust.name
+                    };
+
+                    let photoUrls = item.photo ? item.photo.split(',').map(u => u.trim()).filter(u => u) : [];
+                    let photoHtml = '';
+                    if (photoUrls.length > 0) {
+                        photoHtml = '<div class="d-flex flex-wrap gap-2 mt-2">';
+                        photoUrls.forEach(url => {
+                            let fileId = parseDriveFileId(url);
+                            let cdnUrl = fileId ? `https://lh3.googleusercontent.com/d/${fileId}` : url;
+                            let rawUrl = fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800` : url;
+                            let originalUrl = fileId ? `https://drive.google.com/uc?id=${fileId}` : url;
+                            photoHtml += `<img src="${cdnUrl}" referrerpolicy="no-referrer" class="history-photo" style="width:70px; height:70px;" onclick="window.open('${originalUrl}')" title="點擊開啟原圖" onerror="if(this.src!=='${rawUrl}') this.src='${rawUrl}';">`;
+                        });
+                        photoHtml += '</div>';
+                    }
+                    
+                    recordsHtml += `
+                        <div class="mb-2 ps-2 border-start border-3 position-relative" style="border-color: #e0e0e0 !important; padding-bottom: 8px;">
+                            <button class="btn btn-sm btn-light position-absolute top-0 end-0" style="padding: 2px 6px; font-size: 0.7rem; color: #8e7d71; background: #f4eee8; border-radius: 6px;" onclick="openEditRecordModal(${item.recordRow})">✏️ 修改</button>
+                            <div class="d-flex justify-content-start align-items-center gap-2">
+                                <span class="text-muted" style="font-size: 0.8rem; font-weight: bold;">${item.date}</span>
+                                <span class="badge bg-secondary rounded-pill" style="font-size: 0.75rem;">$${item.amount}</span>
+                            </div>
+                            <div class="text-primary fw-bold mt-1" style="font-size: 0.9rem; color: var(--primary-color) !important; padding-right: 40px;">${item.services}</div>
+                            ${item.formula ? `<div class="text-muted mt-1 bg-white p-1 rounded border border-light" style="font-size: 0.75rem;">🧪 <strong>配方:</strong> ${item.formula}</div>` : ''}
+                            ${item.memo ? `<div class="mt-1 px-2 py-1 rounded-3" style="background: #fff5f2; color: #a56a56; font-size: 0.75rem;">💬 ${item.memo}</div>` : ''}
+                            ${item.usedCoupon ? `<div class="text-success mt-1 bg-white p-1 rounded border border-light" style="font-size: 0.75rem;">🎟️ <strong>使用優惠:</strong> ${item.usedCoupon}</div>` : ''}
+                            ${photoHtml}
+                        </div>`;
+                });
+
+                resDiv.innerHTML += `
+                    <div class="card bg-light border-0 mb-3 shadow-sm p-3" style="border-top: 4px solid var(--primary-color) !important;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong class="fs-5">${cust.name}</strong> <span class="ms-1">${cust.nameBadgesHtml}</span>
+                                <div class="text-muted small mt-1 fw-bold">📞 ${cust.phone}</div>
+                            </div>
+                            <div class="d-flex flex-column align-items-end">
+                                ${actionHtml}
+                                ${editHtml}
+                            </div>
+                        </div>
+                        <div class="mt-2 mb-1 lh-base">${cust.detailBadgesHtml}</div>
+                        <div class="mt-2 pt-2 border-top">
+                            <div class="text-muted small mb-2 fw-bold d-flex justify-content-between align-items-center">
+                                <span>📜 消費歷程 (${cust.records.length}筆)</span>
+                            </div>
+                            <div style="max-height: 250px; overflow-y: auto; padding-right: 5px;" class="custom-scrollbar">
+                                ${recordsHtml ? recordsHtml : '<div class="text-muted small mt-2">尚無消費紀錄，趕緊聯絡他預約吧！✨</div>'}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }).catch(err => {
+            resDiv.innerHTML = `<div class="text-danger mt-3 text-center">網路連線異常，請稍後再試</div>`;
+        });
+    }
+
+    function getRecommend(service) {
+        if (!service) return;
+        const area = document.getElementById('recommendResultArea');
+        const list = document.getElementById('recommendList');
+        const title = document.getElementById('recommendTitle');
+        area.style.display = 'block'; 
+        title.innerText = `🔄 分析【${service.replace('節慶：', '')}】名單中...`; 
+        list.innerHTML = '<div class="text-center my-3"><div class="spinner-border spinner-border-sm" style="color: var(--primary-color);"></div></div>';
+        
+        let actTag = '';
+        if (service === '剪髮') actTag = 'rec_cut';
+        else if (service === '染髮') actTag = 'rec_dye';
+        else if (service === '燙髮') actTag = 'rec_perm';
+        else if (service === '護髮') actTag = 'rec_treat';
+        else if (service.includes('1月')) actTag = 'fest_jan';
+        else if (service.includes('2月')) actTag = 'fest_feb';
+        else if (service.includes('3月')) actTag = 'fest_mar';
+        else if (service.includes('4月')) actTag = 'fest_apr';
+        else if (service.includes('母親節')) actTag = 'fest_may';
+        else if (service.includes('6月')) actTag = 'fest_jun';
+        else if (service.includes('7月')) actTag = 'fest_jul';
+        else if (service.includes('父親節')) actTag = 'fest_aug_father';
+        else if (service.includes('七夕')) actTag = 'fest_aug_vday';
+        else if (service.includes('9月')) actTag = 'fest_sep';
+        else if (service.includes('10月')) actTag = 'fest_oct';
+        else if (service.includes('11月')) actTag = 'fest_nov';
+        else if (service.includes('12月')) actTag = 'fest_dec';
+
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'getRecommendations', payload: service }) })
+        .then(res => res.json()).then(data => {
+            if(data.status === 'error') {
+                alert('系統錯誤: ' + data.message);
+                list.innerHTML = `<div class="text-danger small text-center py-2">讀取失敗</div>`;
+                return;
+            }
+            title.innerText = `🎯 【${service.replace('節慶：', '')}】推廣名單 (${data.data.length}名)`; 
+            list.innerHTML = '';
+            if (data.data.length === 0) { list.innerHTML = '<div class="text-muted small text-center py-2">目前無符合條件之名單</div>'; return; }
+            data.data.forEach(item => {
+                let vipBadge = item.vip ? `<span class="badge bg-warning text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">${item.vip}</span>` : '';
+                let warningHtml = item.warning ? `<div class="warning-text">${item.warning}</div>` : '';
+                let ageBadge = item.age ? `<span class="badge bg-secondary opacity-75 ms-1">${item.age}</span>` : '';
+                
+                let newBadge = item.isNew ? `<span class="badge bg-info text-dark px-1 ms-1 rounded" style="font-size:0.7rem;">🌱 新客</span>` : '';
+                let loyalBadge = item.isLoyal ? `<span class="badge bg-success text-white px-1 ms-1 rounded" style="font-size:0.7rem;">🌟 老客</span>` : '';
+                let refBadge = item.hasReferrer ? `<span class="badge border text-dark px-1 ms-1 rounded" style="font-size:0.7rem; background:#f8f9fa;">🤝 轉介紹</span>` : '';
+                
+                let actionHtml = '';
+                if (item.lineId) {
+                    actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2 shadow-sm fw-bold" style="background:#06C755; color:white; font-size:0.75rem; border-radius:6px; border:none;" data-type="${actTag}" data-name="${item.name}" data-line="${item.lineId}" onclick="copyAndLine(this)">💬 LINE (複製+開啟)</button>`;
+                } else {
+                    actionHtml = `<button class="btn btn-sm px-2 py-1 flex-shrink-0 ms-2" style="background:#f4eee8; color:#8e7d71; font-size:0.75rem; border-radius:6px;" data-type="${actTag}" data-name="${item.name}" onclick="copyAndLine(this)">📋 話術</button>`;
+                }
+
+                list.innerHTML += `
+                    <div class="p-2 mb-2 rounded-3 small position-relative" style="background: #faf9f7; border-left: 3px solid var(--primary-color);">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-bold text-dark">
+                                    <strong class="text-primary text-decoration-underline searchable-name" style="cursor:pointer;" onclick="searchSpecificCustomer('${item.name}')">${item.name}</strong> 
+                                    ${vipBadge} ${newBadge} ${loyalBadge} ${refBadge} ${ageBadge} <span class="text-muted fw-normal ms-1">${item.phone || ''}</span>
+                                </div>
+                                <div class="mt-1" style="color: #b5956a;">${item.reason}</div>
+                            </div>
+                            ${actionHtml}
+                        </div>
+                        ${warningHtml}
+                    </div>`;
+            });
+        }).catch(err => {
+            list.innerHTML = `<div class="text-danger small text-center py-2">網路連線異常，請稍後再試</div>`;
+        });
+    }
+
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 1200; 
+                    let width = img.width, height = img.height;
+                    
+                    if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                    else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                    
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve({ base64: canvas.toDataURL('image/jpeg', 0.8).split(',')[1], mimeType: 'image/jpeg' });
+                };
+            };
+        });
+    }
+
+    document.getElementById('recordForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const phoneInput = document.getElementById('formPhone').value.trim();
+        if (phoneInput !== '') {
+            const phoneRegex = /^09\d{8}$/;
+            if (!phoneRegex.test(phoneInput)) {
+                alert('❌ 手機號碼格式錯誤！請輸入 09 開頭的 10 碼數字。');
+                return; 
+            }
+        }
+
+        const birthdayInput = document.getElementById('formBirthday').value.trim();
+        if (birthdayInput !== '') {
+            const bdayRegex = /^(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])$/;
+            if (!bdayRegex.test(birthdayInput)) {
+                alert('❌ 生日格式錯誤！請輸入有效的「月/日」，例如 12/17 或 05/03。');
+                return; 
+            }
+        }
+
+        const btn = document.getElementById('submitBtn'); btn.innerText = '儲存與照片壓縮中...'; btn.disabled = true;
+        const services = [];
+        [1,2,3,4].forEach(i => { const cb = document.getElementById('srv'+i); if(cb.checked) services.push(cb.value); });
+
+        const hairConds = [];
+        document.querySelectorAll('.hc-cb:checked').forEach(cb => hairConds.push(cb.value));
+
+        const payload = {
+            name: document.getElementById('formName').value, phone: phoneInput,
+            birthday: birthdayInput, gender: document.getElementById('formGender').value, 
+            hairLength: document.getElementById('formHair').value, ageRange: document.getElementById('formAge').value,
+            lifestyle: document.getElementById('formLifestyle').value, hairCondition: hairConds.join(','),
+            date: document.getElementById('formDate').value, referrer: document.getElementById('formReferrer').value,
+            lineId: document.getElementById('formLineId').value,
+            services: services, formula: document.getElementById('formFormula').value, amount: document.getElementById('formAmount').value,
+            products: document.getElementById('formProducts').value, memo: document.getElementById('formMemo').value,
+            usedCoupon: document.getElementById('formUsedCoupon').value, // ⭐ 紀錄使用的折價券
+            photos: []
+        };
+
+        const fileInput = document.getElementById('formPhoto');
+        if (fileInput.files.length > 0) {
+            let promises = [];
+            for(let i=0; i<fileInput.files.length; i++) promises.push(compressImage(fileInput.files[i]));
+            payload.photos = await Promise.all(promises);
+        }
+
+        fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'addRecord', payload: payload }) })
+        .then(res => res.json()).then(data => {
+            if(data.status === 'success') {
+                document.getElementById('recordForm').reset();
+                bootstrap.Modal.getInstance(document.getElementById('addRecordModal')).hide();
+                loadDashboard(); 
+            } else alert('錯誤: ' + data.message);
+            btn.innerText = '儲存紀錄'; btn.disabled = false;
+        });
+    });
+
+    window.onload = loadDashboard;
+</script>
+</body>
+</html>
